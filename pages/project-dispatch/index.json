@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "项目派单",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

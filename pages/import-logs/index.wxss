@@ -1,0 +1,76 @@
+.label {
+  color: #0b7a75;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 800;
+  margin: 8rpx 0 12rpx;
+}
+
+.empty-title,
+.log-id {
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.filter-card {
+  padding: 22rpx 24rpx;
+}
+
+.search-input {
+  font-size: 26rpx;
+  color: #111827;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #eef2f7;
+}
+
+.filters {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  margin: 18rpx 0 12rpx;
+}
+
+.filter {
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #0b7a75;
+  background: #e7f6f4;
+}
+
+.filter.active {
+  color: #ffffff;
+  background: #0b7a75;
+}
+
+.log-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  text-align: center;
+  gap: 10rpx;
+}
+
+.num {
+  color: #0b7a75;
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.load-more {
+  margin: 8rpx 0 24rpx;
+  border-radius: 999rpx;
+  color: #0b7a75;
+  background: #e7f6f4;
+}

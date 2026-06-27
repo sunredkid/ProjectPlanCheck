@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "维护用户",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

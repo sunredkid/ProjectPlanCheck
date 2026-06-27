@@ -1,0 +1,75 @@
+.header,
+.dept-top,
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header {
+  margin-bottom: 22rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: 800;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 25rpx;
+  margin-top: 6rpx;
+}
+
+.dept-name {
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.main-btn,
+.ghost-btn,
+.danger-btn {
+  margin: 0;
+  border-radius: 999rpx;
+}
+
+.main-btn {
+  background: #0b7a75;
+  color: #ffffff;
+}
+
+.ghost-btn {
+  background: #e7f6f4;
+  color: #0b7a75;
+}
+
+.danger-btn {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.search {
+  padding: 22rpx 24rpx;
+  margin-bottom: 14rpx;
+}
+
+.search-input {
+  color: #111827;
+  font-size: 26rpx;
+}
+
+.tag.disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.actions {
+  justify-content: flex-end;
+  gap: 14rpx;
+  margin-top: 22rpx;
+}
+
+
+.empty-state { padding: 44rpx 28rpx; text-align: center; color: #6b7280; }
+.empty-title { color: #111827; font-size: 30rpx; font-weight: 700; }
+.empty-desc { margin-top: 10rpx; font-size: 25rpx; }

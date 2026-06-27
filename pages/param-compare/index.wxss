@@ -1,0 +1,49 @@
+.device-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+.device-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  background: #f0f0f0;
+  color: #555;
+  border: 1px solid transparent;
+}
+.device-chip.selected {
+  background: #0B7A75;
+  color: #fff;
+  border-color: #065f5b;
+  font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(11, 122, 117, 0.18);
+}
+.selected-mark { font-size: 12px; font-weight: 700; }
+.sel-info { font-size: 12px; color: #999; margin: 4px 0; }
+.compare-actions { display: flex; gap: 8px; margin-top: 10px; }
+.section-label { font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #333; }
+.result-section { margin-top: 12px; }
+
+.diff-legend { display: flex; gap: 16px; margin-bottom: 8px; font-size: 12px; color: #666; }
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+.diff-bg { background: #fee2e2; }
+.same-bg { background: #f0f0f0; }
+.missing-bg { background: #fafafa; border: 1px dashed #ddd; }
+
+.category-group { margin-bottom: 12px; }
+.category-header { display: flex; align-items: center; gap: 6px; padding: 6px 0; font-size: 13px; font-weight: 600; color: #333; }
+.category-arrow { width: 16px; text-align: center; font-size: 11px; color: #999; }
+.category-name { flex: 1; }
+.category-count { font-size: 11px; color: #e53e3e; font-weight: 400; }
+
+.compare-table { min-width: 100%; border: 1px solid #eee; border-radius: 6px; overflow: hidden; }
+.compare-row { display: flex; border-bottom: 1px solid #f0f0f0; }
+.compare-row:last-child { border-bottom: none; }
+.compare-row.header-row { font-weight: 600; background: #f8f8f8; }
+.compare-row.diff-row { background: #fff5f5; }
+
+.param-col { flex: 1; min-width: 100px; padding: 8px 6px; font-size: 13px; }
+.device-col { flex: 1; min-width: 80px; padding: 8px 6px; font-size: 13px; text-align: center; border-left: 1px solid #eee; }
+.device-col.missing { color: #ccc; }
+.device-col.diff-cell { background: #fee2e2; color: #b91c1c; font-weight: 600; }
+.device-sub { font-size: 11px; color: #999; }

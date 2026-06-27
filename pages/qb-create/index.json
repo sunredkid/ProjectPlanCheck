@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "新增QB",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

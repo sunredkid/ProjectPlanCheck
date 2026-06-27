@@ -1,0 +1,155 @@
+<view class="page">
+  <view wx:if="{{loading}}" class="loading-card">
+    <view class="muted">加载中...</view>
+  </view>
+
+  <view wx:elif="{{loadError}}" class="state-card">
+    <view class="state-title">加载失败</view>
+    <view class="muted">{{loadError}}</view>
+    <button size="mini" class="main-btn" bindtap="loadStats">重试</button>
+  </view>
+
+  <block wx:else>
+    <view class="title">数据看板</view>
+
+    <view class="section-title">项目概览</view>
+    <view class="stat-grid">
+      <view class="stat-card">
+        <view class="stat-num">{{stats.projects.total}}</view>
+        <view class="stat-label">项目总数</view>
+      </view>
+      <view class="stat-card active">
+        <view class="stat-num">{{stats.projects.active}}</view>
+        <view class="stat-label">进行中</view>
+      </view>
+      <view class="stat-card done">
+        <view class="stat-num">{{stats.projects.done}}</view>
+        <view class="stat-label">已完成</view>
+      </view>
+      <view class="stat-card danger">
+        <view class="stat-num">{{stats.projects.overdue}}</view>
+        <view class="stat-label">已逾期</view>
+      </view>
+    </view>
+
+    <view class="section-title">设备状态分布</view>
+    <view class="stat-grid">
+      <view class="stat-card">
+        <view class="stat-num">{{stats.devices.total}}</view>
+        <view class="stat-label">设备总数</view>
+      </view>
+      <view class="stat-card active">
+        <view class="stat-num">{{stats.devices.active}}</view>
+        <view class="stat-label">生产中</view>
+      </view>
+      <view class="stat-card danger">
+        <view class="stat-num">{{stats.devices.delayed}}</view>
+        <view class="stat-label">已延期</view>
+      </view>
+    </view>
+
+    <view wx:if="{{stats.devices.byStatus}}" class="card">
+      <block wx:for="{{stats.devices.byStatus}}" wx:key="name">
+        <view class="status-bar-row">
+          <view class="bar-label">{{item.name}}</view>
+          <view class="bar-track">
+            <view class="bar-fill" style="width: {{item.count / stats.devices.total * 100}}%"></view>
+          </view>
+          <view class="bar-num">{{item.count}}</view>
+        </view>
+      </block>
+    </view>
+
+    <view class="section-title">QB 异常</view>
+    <view class="stat-grid">
+      <view class="stat-card">
+        <view class="stat-num">{{stats.qb.total}}</view>
+        <view class="stat-label">QB 总数</view>
+      </view>
+      <view class="stat-card warning">
+        <view class="stat-num">{{stats.qb.open}}</view>
+        <view class="stat-label">未关闭</view>
+      </view>
+      <view class="stat-card done">
+        <view class="stat-num">{{stats.qb.closed}}</view>
+        <view class="stat-label">已关闭</view>
+      </view>
+      <view wx:if="{{stats.qb.avgCloseDays > 0}}" class="stat-card">
+        <view class="stat-num">{{stats.qb.avgCloseDays}}天</view>
+        <view class="stat-label">平均关闭周期</view>
+      </view>
+    </view>
+
+    <view wx:if="{{stats.qb.aging}}" class="card">
+      <view class="section-title">QB 时效分布（未关闭）</view>
+      <view class="status-bar-row">
+        <view class="bar-label">7天内</view>
+        <view class="bar-track"><view class="bar-fill bar-green" style="width: {{stats.qb.aging.within7 / stats.qb.total * 100}}%"></view></view>
+        <view class="bar-num">{{stats.qb.aging.within7}}</view>
+      </view>
+      <view class="status-bar-row">
+        <view class="bar-label">8-30天</view>
+        <view class="bar-track"><view class="bar-fill bar-yellow" style="width: {{stats.qb.aging.within30 / stats.qb.total * 100}}%"></view></view>
+        <view class="bar-num">{{stats.qb.aging.within30}}</view>
+      </view>
+      <view class="status-bar-row">
+        <view class="bar-label">超30天</view>
+        <view class="bar-track"><view class="bar-fill bar-red" style="width: {{stats.qb.aging.over30 / stats.qb.total * 100}}%"></view></view>
+        <view class="bar-num">{{stats.qb.aging.over30}}</view>
+      </view>
+    </view>
+
+    <view class="section-title">任务概览</view>
+    <view class="stat-grid">
+      <view class="stat-card">
+        <view class="stat-num">{{stats.tasks.total}}</view>
+        <view class="stat-label">任务总数</view>
+      </view>
+      <view wx:if="{{stats.tasks.byStatus}}" wx:for="{{stats.tasks.byStatus}}" wx:key="name" class="stat-card">
+        <view class="stat-num">{{item.count}}</view>
+        <view class="stat-label">{{item.name}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{stats.myTasks.total > 0}}" class="section-title">我的任务</view>
+    <view wx:if="{{stats.myTasks.total > 0}}" class="stat-grid">
+      <view class="stat-card">
+        <view class="stat-num">{{stats.myTasks.total}}</view>
+        <view class="stat-label">任务总数</view>
+      </view>
+      <view class="stat-card">
+        <view class="stat-num">{{stats.myTasks.pending}}</view>
+        <view class="stat-label">待处理</view>
+      </view>
+      <view class="stat-card done">
+        <view class="stat-num">{{stats.myTasks.done}}</view>
+        <view class="stat-label">已完成</view>
+      </view>
+      <view class="stat-card danger">
+        <view class="stat-num">{{stats.myTasks.overdue}}</view>
+        <view class="stat-label">已逾期</view>
+      </view>
+    </view>
+
+    <view wx:if="{{stats.workload.length}}" class="section-title">人员工作量（进行中任务）</view>
+    <view wx:if="{{stats.workload.length}}" class="card">
+      <view wx:for="{{stats.workload}}" wx:key="name" class="workload-row">
+        <view class="workload-name">{{item.name}}</view>
+        <view class="bar-track">
+          <view class="bar-fill" style="width: {{item.count / stats.workload[0].count * 100}}%"></view>
+        </view>
+        <view class="bar-num">{{item.count}}</view>
+      </view>
+    </view>
+
+    <view wx:if="{{stats.recentOps.length}}" class="section-title">最近操作</view>
+    <view wx:if="{{stats.recentOps.length}}" class="card recent-list">
+      <view wx:for="{{stats.recentOps}}" wx:key="id" class="recent-item">
+        <view class="recent-module">{{item.module}}</view>
+        <view class="recent-action">{{item.action}}</view>
+        <view class="recent-time muted">{{item.createdAt}}</view>
+      </view>
+    </view>
+  </block>
+</view>
+<bottom-nav />

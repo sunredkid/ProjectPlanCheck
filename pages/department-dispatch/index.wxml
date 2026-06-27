@@ -1,0 +1,31 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">部门派单加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card hero">
+    <view class="label">部门派单</view>
+    <view class="title">{{task.process}}</view>
+    <view class="muted">项目：{{task.project}}</view>
+    <view class="muted">设备：{{task.device}}</view>
+    <view class="muted">部门：{{task.department}}｜截止：{{task.due}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">选择具体负责人</view>
+    <view class="chips">
+      <view wx:for="{{users}}" wx:key="*this" class="chip {{selectedUser === item ? 'active' : ''}}" data-value="{{item}}" bindtap="chooseUser">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">派单备注</view>
+    <textarea class="textarea" value="{{remark}}" bindinput="onRemarkInput" placeholder="可填写分配要求、注意事项" />
+  </view>
+
+  <button class="submit-btn" bindtap="submit" loading="{{isSubmitting}}" disabled="{{isSubmitting}}">派给个人</button>
+  </block>
+<bottom-nav />
+</view>

@@ -1,0 +1,47 @@
+<view class="page">
+  <view class="card hero">
+    <view class="label">Operation Logs</view>
+    <view class="title">操作记录</view>
+    <view class="muted">当前阶段记录运行时 mock 写操作，后续迁云时写入 operationLogs 集合。</view>
+  </view>
+
+  <view class="card filter-card">
+    <input class="search-input" value="{{keyword}}" bindinput="onKeywordInput" placeholder="搜索摘要、对象、人员、模块、动作" />
+    <scroll-view scroll-x class="module-scroll">
+      <view class="filters nowrap">
+        <view
+          wx:for="{{moduleFilters}}"
+          wx:key="key"
+          class="filter {{activeModule === item.key ? 'active' : ''}}"
+          data-value="{{item.key}}"
+          bindtap="switchModule"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+    <view class="muted">共 {{total}} 条记录</view>
+  </view>
+
+  <view wx:if="{{!logs.length}}" class="card empty">
+    <view class="empty-title">暂无操作记录</view>
+    <view class="muted">新增、编辑、删除、派单、进度提交、QB 操作后会显示在这里。</view>
+  </view>
+
+  <view wx:for="{{logs}}" wx:key="id" class="card log-card">
+    <view class="log-top">
+      <view>
+        <view class="log-title">{{item.summary}}</view>
+        <view class="muted">{{item.createdAt}}</view>
+      </view>
+      <view class="tag">{{item.module}}</view>
+    </view>
+    <view class="log-grid">
+      <view>动作：{{item.action}}</view>
+      <view>对象：{{item.targetType}} {{item.targetId}}</view>
+      <view>人员：{{item.actor.name}}</view>
+      <view>环境：{{item.actor.envVersion}}</view>
+    </view>
+  </view>
+
+  <button wx:if="{{hasMore}}" class="load-more" bindtap="loadMore">加载更多</button>
+  <bottom-nav />
+</view>

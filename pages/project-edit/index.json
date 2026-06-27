@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "项目编辑",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

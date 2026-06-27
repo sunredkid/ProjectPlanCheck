@@ -1,0 +1,198 @@
+.title {
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 26rpx;
+  margin: 8rpx 0 22rpx;
+}
+
+.search {
+  padding: 22rpx 24rpx;
+}
+
+.search-input {
+  font-size: 26rpx;
+  color: #111827;
+}
+
+.modes {
+  display: flex;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.mode {
+  padding: 10rpx 22rpx;
+  background: #ffffff;
+  border-radius: 999rpx;
+  color: #6b7280;
+  font-size: 26rpx;
+}
+
+.mode.active {
+  background: #0b7a75;
+  color: #ffffff;
+}
+
+.empty-state {
+  padding: 44rpx 28rpx;
+  background: #ffffff;
+  border-radius: 8rpx;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-title {
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.empty-desc {
+  margin-top: 10rpx;
+  font-size: 25rpx;
+}
+
+.device-no {
+  color: #0b7a75;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.device-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  margin: 6rpx 0 16rpx;
+}
+
+.param-line {
+  font-size: 26rpx;
+  color: #374151;
+  margin-top: 8rpx;
+}
+
+.param-match {
+  margin-top: 12rpx;
+}
+
+.param-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.param-value {
+  margin: 8rpx 0;
+  font-size: 30rpx;
+  color: #0b7a75;
+  font-weight: 700;
+}
+
+.main-btn {
+  margin: 22rpx 0 0;
+  background: #0b7a75;
+  color: #ffffff;
+  border-radius: 999rpx;
+}
+
+
+
+/* Template + Batch */
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 8rpx;
+}
+.action-btns {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+.top-action-btn {
+  margin: 0;
+  padding: 0 18rpx;
+  min-width: 76rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  font-size: 22rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #0b7a75;
+  border: 1rpx solid #b7dfdb;
+}
+.top-action-btn::after { border: none; }
+.ghost-btn.small { font-size: 11px; padding: 2px 8px; }
+.ghost-btn.danger { color: #c62828; border-color: #c62828; }
+
+.template-menu { padding: 12px; }
+.tpl-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+.tpl-name { font-size: 13px; font-weight: 600; color: #333; flex: 1; }
+.tpl-meta { font-size: 11px; }
+.tpl-actions { display: flex; gap: 4px; }
+.tpl-footer { margin-top: 10px; text-align: center; }
+
+.batch-bar {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 20rpx;
+  background: #fff8e1;
+  border-bottom: 1rpx solid #ffe082;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.batch-info {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #f57f17;
+}
+.batch-action-btn {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0 12rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+.batch-action-btn::after { border: none; }
+.batch-action-btn.primary {
+  background: #0b7a75;
+  color: #ffffff;
+}
+.batch-action-btn.warning {
+  background: #fff3e0;
+  color: #e65100;
+  border: 1rpx solid #ffcc80;
+}
+
+.param-card { position: relative; }
+.batch-card { padding-left: 72rpx; }
+.batch-selected { background: #fff8e1; border: 1px solid #ffcc80; }
+.batch-check {
+  position: absolute;
+  left: 24rpx;
+  top: 28rpx;
+  z-index: 5;
+}
+.check-box {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 8rpx;
+  border: 4rpx solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: #fff;
+}
+.check-box.checked { background: #0B7A75; border-color: #0B7A75; }

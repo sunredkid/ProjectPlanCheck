@@ -1,0 +1,183 @@
+.label {
+  color: #0b7a75;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 800;
+  margin: 8rpx 0 12rpx;
+}
+
+.state-card {
+  padding: 40rpx 28rpx;
+  text-align: center;
+}
+
+.state-title {
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 700;
+  margin-bottom: 10rpx;
+}
+
+.warning-box {
+  margin-top: 16rpx;
+  padding: 14rpx 18rpx;
+  background: #fff7ed;
+  color: #d97706;
+  border-radius: 14rpx;
+  font-size: 25rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 800;
+  margin-bottom: 18rpx;
+}
+
+.field {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #eef2f7;
+}
+
+.field:last-child {
+  border-bottom: none;
+}
+
+.field-label {
+  color: #374151;
+  font-size: 28rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+.input,
+.picker-value,
+.textarea {
+  background: #f9fafb;
+  border-radius: 14rpx;
+  padding: 18rpx;
+  color: #1f2937;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.input {
+  height: 76rpx;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 180rpx;
+}
+
+.textarea.small {
+  min-height: 120rpx;
+}
+
+.chips,
+.device-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.chip,
+.device-item {
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 25rpx;
+}
+
+.chip.active,
+.device-item.active {
+  background: #0b7a75;
+  color: #ffffff;
+}
+
+.empty-tip {
+  color: #d97706;
+  font-size: 25rpx;
+  margin-top: 10rpx;
+}
+
+.upload-btn {
+  margin: 18rpx 0 0;
+  background: #e7f6f4;
+  color: #0b7a75;
+  border-radius: 14rpx;
+}
+
+.attachment-list {
+  margin-top: 16rpx;
+}
+
+.attachment-row,
+.attachment-main {
+  display: flex;
+  align-items: center;
+}
+
+.attachment-row {
+  justify-content: space-between;
+  gap: 14rpx;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #eef2f7;
+}
+
+.attachment-main {
+  flex: 1;
+  min-width: 0;
+  gap: 12rpx;
+}
+
+.attachment-icon {
+  flex: 0 0 auto;
+  padding: 8rpx 12rpx;
+  border-radius: 10rpx;
+  background: #e7f6f4;
+  color: #0b7a75;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.attachment-name {
+  max-width: 430rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.remove-btn {
+  margin: 0;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 999rpx;
+}
+
+.bottom-actions {
+  position: sticky;
+  bottom: 0;
+  padding: 18rpx 0 28rpx;
+  background: #f5f7fa;
+}
+
+.submit-btn {
+  background: #0b7a75;
+  color: #ffffff;
+  border-radius: 999rpx;
+}
+
+
+.att-meta-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.att-cat-tag { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: #e8f5e9; color: #2e7d32; white-space: nowrap; }
+.upload-progress { margin-top: 8px; }
+.progress-text { font-size: 12px; color: #666; margin-bottom: 4px; }
+.upload-bar { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #e0e0e0; }
+.cloud-mark { color: #0B7A75; font-weight: 500; }

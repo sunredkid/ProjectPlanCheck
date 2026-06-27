@@ -1,0 +1,91 @@
+﻿<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">QB 详情加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card hero">
+    <view class="qb-no">{{qb.qbNo}}</view>
+    <view class="qb-title">{{qb.description}}</view>
+    <view class="hero-row">
+      <view class="tag">{{qb.status}}</view>
+      <view class="muted">当前负责人：{{qb.currentOwner}}</view>
+    </view>
+    <view class="viewer-tip">当前登录：{{currentUser.name}}｜{{currentUser.department}}｜{{currentUser.role}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">基础信息</view>
+    <view class="info-grid">
+      <view>项目号：{{qb.projectNo}}</view>
+      <view>项目名称：{{qb.projectName}}</view>
+      <view>异常类别：{{qb.category}}</view>
+      <view>产品线：{{qb.productLine}}</view>
+      <view>提出工序：{{qb.raisedProcess}}</view>
+      <view>发生时间：{{qb.occurredAt}}</view>
+      <view>发生数量：{{qb.quantity}}</view>
+      <view>所在部门：{{qb.department}}</view>
+      <view>责任部门：{{qb.responsibleDepartment}}</view>
+      <view>发起人：{{qb.initiator}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">原因与对策</view>
+    <view class="paragraph">
+      <view class="field-title">异常原因</view>
+      <view>{{qb.reason}}</view>
+    </view>
+    <view class="paragraph">
+      <view class="field-title">临时对策</view>
+      <view>{{qb.temporaryAction}}</view>
+    </view>
+    <view class="paragraph">
+      <view class="field-title">长效对策</view>
+      <view>{{qb.longTermAction}}</view>
+    </view>
+  </view>
+
+  
+  <view wx:if="{{qb.assignees && qb.assignees.length > 0}}" class="card">
+    <view class="section-title">协作者</view>
+    <view class="assignee-list">
+      <view wx:for="{{qb.assignees}}" wx:key="name" class="assignee-row">
+        <view class="assignee-name">{{item.name}}</view>
+        <view class="assignee-status {{item.status === '已完成' ? 'done' : item.status === '处理中' ? 'doing' : 'pending'}}">{{item.status}}</view>
+      </view>
+    </view>
+  </view><view class="card">
+    <view class="section-title">关联设备</view>
+    <view wx:if="{{linkedDevices.length === 0}}" class="empty-tip">暂无关联设备。</view>
+    <view class="device-tags">
+      <view wx:for="{{linkedDevices}}" wx:key="*this" class="device-tag">{{item}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{canSubmitProgress}}" class="card">
+    <view class="section-title">提交处理进展</view>
+    <textarea class="textarea" value="{{progressText}}" bindinput="onProgressInput" placeholder="填写当前处理结果、需要谁配合、下一步动作" />
+    <button class="main-btn" bindtap="submitProgress" loading="{{isSubmittingProgress}}" disabled="{{isSubmittingProgress}}">提交处理进展</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">处理记录</view>
+    <view wx:if="{{logs.length === 0}}" class="empty-tip">暂无处理记录。</view>
+    <view wx:for="{{logs}}" wx:key="rowKey" class="log-row">
+      <view class="log-dot"></view>
+      <view>
+        <view class="log-main">{{item.time}}｜{{item.user}}</view>
+        <view class="muted">{{item.content}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showActions}}" class="bottom-actions {{actionLayout}}">
+    <button wx:if="{{canTransferQb}}" class="ghost-btn" bindtap="transferQb">转交</button>
+    <button wx:if="{{canCloseQb}}" class="close-btn" bindtap="closeQb" loading="{{isClosing}}" disabled="{{isClosing}}">结案确认</button>
+  </view>
+  </block>
+</view>
+<bottom-nav />

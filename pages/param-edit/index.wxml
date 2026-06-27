@@ -1,0 +1,53 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">参数维护加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">电气设计部员工可维护参数字段和参数值。</view>
+  </view>
+
+  <view class="card">
+    <view class="field">
+      <view class="field-label">参数名称 *</view>
+      <input class="input" value="{{form.name}}" data-field="name" bindinput="setField" placeholder="例如：DI点数" />
+    </view>
+
+    <view class="field">
+      <view class="field-label">参数值 *</view>
+      <input class="input" value="{{form.value}}" data-field="value" bindinput="setField" placeholder="例如：48" />
+    </view>
+
+    <view class="field">
+      <view class="field-label">单位</view>
+      <input class="input" value="{{form.unit}}" data-field="unit" bindinput="setField" placeholder="例如：点、CMH、kW" />
+    </view>
+
+    <view class="field">
+      <view class="field-label">分类</view>
+      <view class="chips">
+        <view wx:for="{{categories}}" wx:key="*this" class="chip {{form.category === item ? 'active' : ''}}" data-value="{{item}}" bindtap="chooseCategory">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="field">
+      <view class="field-label">排序说明</view>
+      <view class="hint strong">新增参数默认加在该分类最后；保存后回到参数详情页，点击“排序”，按住每行尾部三横线拖动调整。</view>
+    </view>
+
+    <view class="field">
+      <view class="field-label">备注</view>
+      <textarea class="textarea" value="{{form.remark}}" data-field="remark" bindinput="setField" placeholder="可记录参数来源、注意事项" />
+    </view>
+  </view>
+
+  <view class="bottom-actions {{mode === 'edit' ? 'two' : 'one'}}">
+    <button wx:if="{{mode === 'edit'}}" class="disable-btn" bindtap="disableField" loading="{{isDisabling}}" disabled="{{isBusy}}">停用字段</button>
+    <button class="submit-btn" bindtap="save" loading="{{isSaving}}" disabled="{{isBusy}}">保存</button>
+  </view>
+  </block>
+</view>
+<bottom-nav />

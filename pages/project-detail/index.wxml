@@ -1,0 +1,160 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">项目加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card project-hero">
+    <view class="project-no">{{project.projectNo}}</view>
+    <view class="project-name">{{project.name}}</view>
+    <view class="info-grid">
+      <view>客户：{{project.customer}}</view>
+      <view>产品线：{{project.productLine}}</view>
+      <view>管理员：{{project.admin}}</view>
+      <view>计划发货：{{project.shipDate}}</view>
+    </view>
+    <view class="summary">
+      <view>
+        <view class="summary-num">{{project.progress}}%</view>
+        <view class="summary-label">总体进度</view>
+      </view>
+      <view>
+        <view class="summary-num">{{project.deviceCount}}</view>
+        <view class="summary-label">设备</view>
+      </view>
+      <view>
+        <view class="summary-num danger">{{project.delayedCount}}</view>
+        <view class="summary-label">延期</view>
+      </view>
+      <view>
+        <view class="summary-num warning">{{project.qbOpen}}</view>
+        <view class="summary-label">未关闭QB</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="project-actions">
+    <button size="mini" class="ghost-btn" bindtap="editProject">编辑项目</button>
+    <button size="mini" class="ghost-btn" bindtap="archiveProject">归档项目</button>
+    <button size="mini" class="danger-btn" bindtap="deleteProject">删除项目</button>
+    <button size="mini" class="main-btn" bindtap="openDispatch">项目派单</button>
+  </view>
+
+  <view class="tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="*this"
+      class="tab {{activeTab === item ? 'active' : ''}}"
+      data-value="{{item}}"
+      bindtap="switchTab"
+    >
+      {{item}}
+    </view>
+  </view>
+
+  <block wx:if="{{activeTab === '设备进度'}}">
+    <view class="section-row">
+      <view class="section-title">设备进度总览</view>
+      <button size="mini" class="main-btn" bindtap="addDevice">新增设备</button>
+    </view>
+
+    <view wx:if="{{devices.length === 0}}" class="state-card">
+      <view class="state-title">暂无设备</view>
+      <view class="muted">可先新增设备，再进行派单和进度跟踪。</view>
+    </view>
+
+    <view wx:for="{{devices}}" wx:key="id" class="card device-card">
+      <view class="device-top">
+        <view>
+          <view class="device-no">{{item.deviceNo}}</view>
+          <view class="device-area">{{item.area}}</view>
+        </view>
+        <view class="tag">{{item.progress}}%</view>
+      </view>
+      <view class="muted">型号：{{item.model}}</view>
+      <view class="muted">计划发货：{{item.shipDate}}</view>
+
+      <view class="device-actions">
+        <button size="mini" class="ghost-btn" data-id="{{item.id}}" bindtap="toggleDeviceProcesses">
+          {{expandedDevices[item.id] ? '收起工序' : '展开工序'}}
+        </button>
+        <button size="mini" class="main-btn" data-id="{{item.id}}" bindtap="openDevice">查看详情</button>
+      </view>
+
+      <view wx:if="{{expandedDevices[item.id]}}" class="process-list">
+        <view wx:for="{{item.processes}}" wx:for-item="p" wx:key="name" class="process-row">
+          <view class="process-left">
+            <view class="dot {{p.status === '已完成' ? 'done' : ''}} {{p.status === '进行中' ? 'doing' : ''}} {{p.status === '已延期' ? 'late' : ''}}"></view>
+            <view>
+              <view class="process-name">{{p.name}}</view>
+              <view class="process-meta">截止：{{p.due}}｜负责人：{{p.owner}}</view>
+            </view>
+          </view>
+          <view class="status {{p.status === '已延期' ? 'danger' : ''}}">{{p.status}}</view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:elif="{{activeTab === 'QB异常'}}">
+    <view class="section-row">
+      <view class="section-title">项目 QB 异常</view>
+      <button wx:if="{{canCreateQb}}" size="mini" class="main-btn" bindtap="addQb">新增QB</button>
+    </view>
+
+    <view wx:if="{{qbList.length === 0}}" class="state-card">
+      <view class="state-title">暂无 QB 异常</view>
+      <view class="muted">当前项目没有未处理或历史 QB 记录。</view>
+    </view>
+
+    <view wx:for="{{qbList}}" wx:key="qbNo" class="card qb-card">
+      <view class="qb-no">{{item.qbNo}}</view>
+      <view class="qb-title">{{item.title}}</view>
+      <view class="muted">提出工序：{{item.process}}</view>
+      <view class="muted">当前负责人：{{item.owner}}</view>
+      <view class="muted">发生时间：{{item.occurredAt}}</view>
+      <view class="qb-bottom">
+        <view class="tag">{{item.status}}</view>
+        <button size="mini" class="main-btn" data-no="{{item.qbNo}}" bindtap="openQb">查看详情</button>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card empty">
+      <view class="empty-title">项目附件</view>
+      <view class="muted">可选择项目图纸、清单、现场图片等本地附件预览。</view>
+      <button size="mini" class="ghost-btn attachment-add" bindtap="chooseAttachment">选择附件</button>
+    </view>
+
+    <view wx:if="{{attachments.length}}" class="card">
+      <view wx:for="{{attachments}}" wx:key="id" class="attachment-row">
+        <view class="attachment-main" data-index="{{index}}" bindtap="previewCloudFile">
+          <view class="attachment-icon">{{item.icon}}</view>
+          <view>
+            <view class="attachment-name">{{item.name}}</view>
+            <view class="att-cat-tag">{{item.category || "图纸"}}</view>
+            <view wx:if="{{item.uploaded}}" class="muted cloud-mark">云已上传</view>
+            <view wx:else class="muted">{{item.type === 'image' ? '点击预览图片' : '点击打开文件'}}</view>
+          </view>
+        </view>
+        <button size="mini" class="remove-btn" data-index="{{index}}" bindtap="removeAttachment">移除</button>
+      </view>
+
+      <view wx:if="{{cloudUploadEnabled}}" class="upload-bar">
+        <view wx:if="{{isUploadingAtt}}" class="upload-progress">
+          <view class="progress-text">正在上传... {{uploadProgress}}/{{uploadTotal}}</view>
+          <progress percent="{{uploadProgress * 100 / uploadTotal}}" stroke-width="4" active />
+        </view>
+        <view wx:else>
+          <button size="mini" class="main-btn" bindtap="uploadAttachments" disabled="{{isUploadingAtt}}">
+            云同步到云端
+          </button>
+        </view>
+      </view>
+    </view>
+  </block>
+  </block>
+</view>
+<bottom-nav />

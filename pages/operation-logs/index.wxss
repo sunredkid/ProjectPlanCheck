@@ -1,0 +1,79 @@
+.label {
+  color: #0b7a75;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 800;
+  margin: 8rpx 0 12rpx;
+}
+
+.empty-title,
+.log-title {
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.filter-card {
+  padding: 22rpx 24rpx;
+}
+
+.search-input {
+  font-size: 26rpx;
+  color: #111827;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #eef2f7;
+}
+
+.module-scroll {
+  white-space: nowrap;
+  margin: 18rpx 0 12rpx;
+}
+
+.filters {
+  display: flex;
+  gap: 12rpx;
+}
+
+.nowrap {
+  flex-wrap: nowrap;
+}
+
+.filter {
+  flex: 0 0 auto;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #0b7a75;
+  background: #e7f6f4;
+}
+
+.filter.active {
+  color: #ffffff;
+  background: #0b7a75;
+}
+
+.log-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.log-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10rpx;
+  color: #4b5563;
+  font-size: 25rpx;
+}
+
+.load-more {
+  margin: 8rpx 0 24rpx;
+  border-radius: 999rpx;
+  color: #0b7a75;
+  background: #e7f6f4;
+}

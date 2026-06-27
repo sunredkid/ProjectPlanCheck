@@ -1,0 +1,75 @@
+﻿<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">参数详情加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card hero">
+    <view class="device-no">{{device.deviceNo}}</view>
+    <view class="title">{{device.projectName}}</view>
+    <view class="device-meta">
+      <view>机组型号：{{device.model}}</view>
+      <view>位置/区域：{{device.area}}</view>
+    </view>
+    <view class="viewer-tip">当前登录：{{currentUser.name}}｜{{currentUser.department}}</view>
+  </view>
+
+  <view class="section-row">
+    <view>
+      <view class="section-title">电气参数知识树</view>
+      <view class="muted">按类别分组，可展开/折叠；机组型号和位置作为设备基础信息展示。</view>
+    </view>
+    <view wx:if="{{canEdit}}" class="action-group">
+      <button size="mini" class="ghost-btn" bindtap="toggleSortMode">{{sortMode ? '完成排序' : '排序'}}</button>
+      <button size="mini" class="main-btn" bindtap="addParam">新增参数</button>
+    </view>
+  </view>
+
+  <view wx:if="{{sortMode}}" class="card sort-tip">
+    <view class="muted">新增参数默认排在所有参数最后。排序时按住每行尾部“三横线”上下拖动，松手即放置；支持同分组上下拖拽排序，左右滑动手势可跨分组移动参数。</view>
+  </view>
+
+  <view wx:if="{{groupedParams.length === 0}}" class="card state-card">
+    <view class="state-title">暂无参数</view>
+    <view class="muted">当前设备还没有维护电气参数，可由电气设计部新增。</view>
+  </view>
+
+  <view wx:for="{{groupedParams}}" wx:key="category" class="group-card">
+    <view class="group-header" data-category="{{item.category}}" bindtap="toggleGroup">
+      <view>
+        <view class="group-title">{{item.collapsed ? '▸' : '▾'}} {{item.category}}</view>
+        <view class="muted">{{item.count}} 个参数</view>
+      </view>
+      <view class="group-pill">知识节点</view>
+    </view>
+
+    <view wx:if="{{!item.collapsed}}" class="group-body">
+      <view wx:for="{{item.items}}" wx:for-item="param" wx:key="id" class="card param-card {{dragState && dragState.id === param.id ? 'dragging' : ''}}">
+        <view class="param-head">
+          <view class="param-name">{{param.sort}}. {{param.name}}</view>
+          <view
+            wx:if="{{canEdit && sortMode}}"
+            class="drag-handle"
+            data-id="{{param.id}}"
+            data-category="{{param.category}}"
+            bindtouchstart="startDrag"
+            bindtouchmove="moveDrag"
+            bindtouchend="endDrag"
+            catchtap="endDrag"
+          >
+            ☰
+          </view>
+          <button wx:elif="{{canEdit}}" size="mini" class="edit-btn" data-id="{{param.id}}" bindtap="editParam">编辑</button>
+        </view>
+        <view class="param-value-block">{{param.value}} {{param.unit}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{!canEdit}}" class="card read-tip">
+    <view class="muted">当前账号不是电气设计部，仅可查看参数。</view>
+  </view>
+  </block>
+</view>
+<bottom-nav />

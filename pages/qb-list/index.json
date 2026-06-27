@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "QB 异常",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

@@ -1,0 +1,141 @@
+<view class="page">
+  <view class="header-bar">
+    <view class="title">任务</view>
+    <view class="view-toggle" bindtap="switchViewMode">
+      {{viewMode === "list" ? "看板视图" : "列表视图"}}
+    </view>
+  </view>
+
+  <!-- List View (existing) -->
+  <block wx:if="{{viewMode === 'list'}}">
+    <view class="subtitle">生产任务和 QB 待处理都会在这里提醒</view>
+
+    <view class="tabs">
+      <view
+        wx:for="{{tabs}}"
+        wx:key="key"
+        class="tab {{activeTab === item.key ? 'active' : ''}}"
+        data-value="{{item.key}}"
+        bindtap="switchTab"
+      >{{item.label}}</view>
+    </view>
+
+    <view class="card filter-card">
+      <input class="search-input" value="{{keyword}}" bindinput="onKeywordInput" placeholder="搜索项目、设备、工序、部门、QB号" />
+      <input class="search-input owner-input" value="{{ownerKeyword}}" bindinput="onOwnerInput" placeholder="筛选负责人或部门" />
+      <view class="status-filters">
+        <view
+          wx:for="{{statusFilters}}"
+          wx:key="key"
+          class="status-filter {{activeStatus === item.key ? 'active' : ''}}"
+          data-value="{{item.key}}"
+          bindtap="switchStatus"
+        >{{item.label}}</view>
+      </view>
+      <view class="filter-footer">
+        <view class="muted">共 {{total}} 条任务</view>
+        <view class="filter-actions">
+          <view class="toggle {{dueSoonOnly ? 'active' : ''}}" bindtap="toggleDueSoon">仅看临期/逾期</view>
+          <button size="mini" class="reset-btn" bindtap="resetFilters">重置</button>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{tasks.length === 0 && !loading}}" class="empty-state">
+      <view class="empty-title">当前筛选暂无任务</view>
+      <view class="empty-desc">可切换分类或调整组合筛选条件。</view>
+    </view>
+
+    <view wx:for="{{tasks}}" wx:key="rowKey" class="card task-card {{item.urgency}}">
+      <view class="task-type">{{item.type}}</view>
+
+      <block wx:if="{{item.kind === 'process'}}">
+        <view class="task-title">{{item.process}}</view>
+        <view class="muted">项目：{{item.project}}</view>
+        <view class="muted">设备：{{item.device}}</view>
+        <view class="muted">负责人：{{item.owner}}</view>
+        <view class="muted">计划截止：{{item.dueDate}}</view>
+        <view wx:if="{{item.dueLabel}}" class="due-label {{item.urgency}}">{{item.dueLabel}}</view>
+        <view class="row">
+          <text class="tag">{{item.status}}</text>
+          <button size="mini" class="main-btn" data-row-key="{{item.rowKey}}" bindtap="submitProgress">提交进度</button>
+        </view>
+      </block>
+
+      <block wx:elif="{{item.kind === 'assign'}}">
+        <view class="task-title">{{item.process}}</view>
+        <view class="muted">项目：{{item.project}}</view>
+        <view class="muted">设备：{{item.device}}</view>
+        <view class="muted">部门：{{item.department}}</view>
+        <view class="muted">计划截止：{{item.dueDate}}</view>
+        <view wx:if="{{item.dueLabel}}" class="due-label {{item.urgency}}">{{item.dueLabel}}</view>
+        <view class="row">
+          <text class="tag">{{item.status}}</text>
+          <button size="mini" class="main-btn" data-row-key="{{item.rowKey}}" bindtap="assignTask">派给个人</button>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view class="task-title">{{item.qbNo}}</view>
+        <view class="muted">项目：{{item.project}}</view>
+        <view class="muted">异常：{{item.title}}</view>
+        <view class="row">
+          <text class="tag">{{item.status}}</text>
+          <button size="mini" class="main-btn" data-qb-no="{{item.qbNo}}" bindtap="handleQb">处理QB</button>
+        </view>
+      </block>
+    </view>
+
+    <view wx:if="{{hasMore}}" class="load-more-row">
+      <button size="mini" class="load-more-btn" loading="{{loadingMore}}" bindtap="loadMoreTasks">加载更多</button>
+    </view>
+
+    <view wx:elif="{{tasks.length > 0 && total > 0 && !hasMore}}" class="load-more-row">
+      <view class="muted">已显示全部 {{total}} 条任务</view>
+    </view>
+  </block>
+
+  <!-- Kanban View -->
+  <block wx:if="{{viewMode === 'kanban'}}">
+    <view class="kanban-board">
+      <scroll-view scroll-x class="kanban-scroll">
+        <view class="kanban-cols">
+          <view
+            wx:for="{{kanbanColumns}}"
+            wx:key="key"
+            class="kanban-col {{dragOverColumn === item.key ? 'drag-over' : ''}}"
+            data-column="{{item.key}}"
+            bindtap="onDragOverColumn"
+          >
+            <view class="kanban-col-header">
+              <view class="kanban-col-title">{{item.label}}</view>
+              <view class="kanban-col-count">{{item.tasks.length}}</view>
+            </view>
+            <view class="kanban-col-body">
+              <view
+                wx:for="{{item.tasks}}"
+                wx:key="rowKey"
+                wx:for-item="task"
+                class="kanban-card {{draggingTask === task.rowKey ? 'dragging' : ''}}"
+                data-row-key="{{task.rowKey}}"
+                catchtouchstart="onTaskTouchStart"
+                catchtouchmove="onTaskTouchMove"
+                catchtouchend="onDropTask"
+                data-column="{{item.key}}"
+              >
+                <view class="kanban-card-type">{{task.type}}</view>
+                <view class="kanban-card-title">{{task.process || task.qbNo || task.title}}</view>
+                <view class="kanban-card-meta">{{task.project}}</view>
+                <view wx:if="{{task.owner}}" class="kanban-card-owner">{{task.owner}}</view>
+              </view>
+              <view wx:if="{{item.tasks.length === 0}}" class="kanban-empty">暂无任务</view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+    <view class="kanban-hint">长按卡片可拖拽到其他列（移动端轻触卡片移入目标列即可）</view>
+  </block>
+
+  <bottom-nav />
+</view>

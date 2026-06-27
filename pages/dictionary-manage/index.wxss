@@ -1,0 +1,11 @@
+.dict-row { border-bottom: 1px solid #f0f0f0; padding: 8px 0; }
+.dict-row:last-child { border-bottom: none; }
+.dict-item { display: flex; justify-content: space-between; align-items: center; }
+.dict-text { font-size: 14px; color: #333; }
+.dict-actions { display: flex; gap: 12px; }
+.action-link { font-size: 13px; color: #0B7A75; }
+.action-link.danger { color: #e53935; }
+.edit-input { border: 1px solid #ddd; border-radius: 6px; padding: 6px 10px; font-size: 14px; width: 100%; box-sizing: border-box; }
+.edit-actions { display: flex; gap: 6px; margin-top: 4px; }
+.add-row { margin-top: 10px; display: flex; gap: 8px; align-items: center; }
+.note { margin-top: 12px; }

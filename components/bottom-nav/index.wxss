@@ -1,0 +1,28 @@
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 998;
+  height: 82rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #ffffff;
+  border-top: 1rpx solid #e5e7eb;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  box-shadow: 0 -4rpx 16rpx rgba(15, 23, 42, 0.04);
+}
+
+.nav-item {
+  height: 82rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  font-size: 22rpx;
+}
+
+.nav-item.active {
+  color: #0b7a75;
+  font-weight: 800;
+}

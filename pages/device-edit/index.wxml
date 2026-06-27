@@ -1,0 +1,45 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">设备编辑加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">{{project.projectNo}} {{project.name}}</view>
+  </view>
+
+  <view class="card">
+    <view class="field">
+      <view class="field-label">设备编号 *</view>
+      <input class="input {{isEdit ? 'readonly' : ''}}" value="{{form.deviceNo}}" data-field="deviceNo" bindinput="setField" disabled="{{isEdit}}" placeholder="例如 项目号-01" />
+    </view>
+    <view class="field">
+      <view class="field-label">型号</view>
+      <input class="input" value="{{form.model}}" data-field="model" bindinput="setField" placeholder="设备型号" />
+    </view>
+    <view class="field">
+      <view class="field-label">位置 / 区域</view>
+      <input class="input" value="{{form.area}}" data-field="area" bindinput="setField" placeholder="例如 DHU-03 干燥区" />
+    </view>
+    <view class="field">
+      <view class="field-label">计划发货</view>
+      <picker mode="date" value="{{form.shipDate}}" bindchange="onShipDateChange">
+        <view class="picker-value">{{form.shipDate}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <view class="field-label">状态</view>
+      <view class="chips">
+        <view wx:for="{{statuses}}" wx:key="*this" class="chip {{form.status === item ? 'active' : ''}}" data-value="{{item}}" bindtap="chooseStatus">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-actions">
+    <button class="submit-btn" bindtap="save" loading="{{isSaving}}" disabled="{{isSaving}}">保存</button>
+  </view>
+  </block>
+</view>
+<bottom-nav />

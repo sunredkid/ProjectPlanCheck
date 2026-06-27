@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "项目总列表",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

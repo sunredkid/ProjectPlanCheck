@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "导入日志",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

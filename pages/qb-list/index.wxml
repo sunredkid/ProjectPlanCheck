@@ -1,0 +1,82 @@
+<view class="page">
+  <view class="card hero">
+    <view class="label">QB</view>
+    <view class="title">QB 异常列表</view>
+    <view class="muted">集中查看全部项目的 QB 异常，可按状态和关键词筛选。</view>
+  </view>
+
+  <view class="card filter-card">
+    <input class="search-input" value="{{keyword}}" bindinput="onKeywordInput" placeholder="搜索QB号、项目、异常、工序、负责人" />
+    <view class="filter-title">状态</view>
+    <view class="filters">
+      <view
+        wx:for="{{statusFilters}}"
+        wx:key="key"
+        class="filter {{activeStatus === item.key ? 'active' : ''}}"
+        data-value="{{item.key}}"
+        bindtap="switchStatus"
+      >{{item.label}}</view>
+    </view>
+
+    <view wx:if="{{projectOptions.length}}" class="filter-title">项目</view>
+    <scroll-view wx:if="{{projectOptions.length}}" scroll-x class="scroll-filters">
+      <view class="scroll-inner">
+        <view class="filter {{activeProjectNo === '' ? 'active' : ''}}" data-value="" bindtap="switchProject">全部项目</view>
+        <view
+          wx:for="{{projectOptions}}"
+          wx:key="key"
+          class="filter project-filter {{activeProjectNo === item.key ? 'active' : ''}}"
+          data-value="{{item.key}}"
+          bindtap="switchProject"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+
+    <view wx:if="{{ownerOptions.length}}" class="filter-title">负责人</view>
+    <scroll-view wx:if="{{ownerOptions.length}}" scroll-x class="scroll-filters">
+      <view class="scroll-inner">
+        <view class="filter {{activeOwner === '' ? 'active' : ''}}" data-value="" bindtap="switchOwner">全部负责人</view>
+        <view
+          wx:for="{{ownerOptions}}"
+          wx:key="key"
+          class="filter {{activeOwner === item.key ? 'active' : ''}}"
+          data-value="{{item.key}}"
+          bindtap="switchOwner"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+
+    <view class="filter-footer">
+      <view class="muted">共 {{total}} 条 QB</view>
+      <button size="mini" class="ghost-btn" bindtap="resetFilters" disabled="{{isLoading}}">重置筛选</button>
+    </view>
+  </view>
+
+  <view wx:if="{{!qbList.length}}" class="card empty">
+    <view class="empty-title">暂无匹配 QB</view>
+    <view class="muted">可调整关键词或状态筛选。</view>
+  </view>
+
+  <view wx:for="{{qbList}}" wx:key="qbNo" class="card qb-card">
+    <view class="qb-top">
+      <view>
+        <view class="qb-no">{{item.qbNo}}</view>
+        <view class="qb-title">{{item.title}}</view>
+      </view>
+      <view class="tag">{{item.status}}</view>
+    </view>
+    <view class="info-grid">
+      <view>项目：{{item.projectNo}} {{item.projectName}}</view>
+      <view>工序：{{item.process}}</view>
+      <view>负责人：{{item.displayOwner}}</view>
+      <view>发生时间：{{item.occurredAt}}</view>
+    </view>
+    <view class="qb-bottom">
+      <view class="muted">全局 QB 列表</view>
+      <button size="mini" class="main-btn" data-no="{{item.qbNo}}" bindtap="openQb">查看详情</button>
+    </view>
+  </view>
+
+  <button wx:if="{{hasMore}}" class="load-more" bindtap="loadMore" loading="{{isLoading}}" disabled="{{isLoading}}">加载更多</button>
+  <bottom-nav />
+</view>

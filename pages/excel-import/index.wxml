@@ -1,0 +1,158 @@
+<view class="page">
+  <view class="card hero">
+    <view class="label">Excel 导入</view>
+    <view class="title">批量导入项目、设备和工序计划</view>
+    <view class="muted">标准模板：{{preview.templateVersion}}</view>
+    <view class="muted">标准工作表：{{preview.standardSheet}}</view>
+    <view class="muted">解析方式：{{mappingMode}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">选择文件</view>
+    <view class="file-box">
+      <view>
+        <view class="file-name">{{selectedFileText}}</view>
+        <view class="muted">当前仅支持“③单台设备进度”标准导入工作表</view>
+      </view>
+    </view>
+    <view class="button-row primary-row">
+      <button size="mini" class="ghost-btn import-choose-btn" bindtap="chooseFile" disabled="{{isBusy}}">选择 Excel</button>
+      <button size="mini" class="main-btn import-parse-btn" bindtap="parseFile" loading="{{isParsing}}" disabled="{{isBusy}}">解析预览</button>
+    </view>
+    <view class="button-row secondary-row">
+      <button size="mini" class="ghost-btn import-aux-btn" bindtap="downloadTemplate" disabled="{{isBusy}}">复制模板路径</button>
+      <button size="mini" class="ghost-btn import-aux-btn" bindtap="openLogs" disabled="{{isBusy}}">导入日志</button>
+      <button size="mini" class="ghost-btn import-aux-btn" bindtap="chooseAcceptanceFiles" loading="{{isAccepting}}" disabled="{{isBusy}}">多样本验收</button>
+    </view>
+  </view>
+
+  <view wx:if="{{acceptanceParsed}}" class="card">
+    <view class="section-title">多样本验收</view>
+    <view class="summary-grid acceptance-grid">
+      <view>
+        <view class="num">{{acceptanceSummary.total}}</view>
+        <view class="muted">文件</view>
+      </view>
+      <view>
+        <view class="num success">{{acceptanceSummary.passed}}</view>
+        <view class="muted">通过</view>
+      </view>
+      <view>
+        <view class="num danger">{{acceptanceSummary.failed}}</view>
+        <view class="muted">未通过</view>
+      </view>
+      <view>
+        <view class="num warning">{{acceptanceSummary.warningCount}}</view>
+        <view class="muted">警告</view>
+      </view>
+      <view>
+        <view class="num danger">{{acceptanceSummary.errorCount}}</view>
+        <view class="muted">错误</view>
+      </view>
+    </view>
+
+    <view wx:for="{{acceptanceItems}}" wx:key="fileName" class="acceptance-row">
+      <view class="acceptance-head">
+        <view>
+          <view class="acceptance-file">{{item.fileName}}</view>
+          <view class="muted">{{item.standardSheet}} · 项目 {{item.projectCount}} · 设备 {{item.deviceCount}} · 工序 {{item.taskCount}}</view>
+        </view>
+        <view class="tag {{item.statusClass}}-tag">{{item.status}}</view>
+      </view>
+      <view wx:if="{{item.firstError}}" class="issue-text danger">{{item.firstError}}</view>
+      <view wx:elif="{{item.firstWarning}}" class="issue-text warning">{{item.firstWarning}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{parsed}}" class="card">
+    <view class="section-title">导入预览</view>
+    <view class="summary-grid">
+      <view>
+        <view class="num">{{preview.projectCount}}</view>
+        <view class="muted">项目</view>
+      </view>
+      <view>
+        <view class="num">{{preview.deviceCount}}</view>
+        <view class="muted">设备</view>
+      </view>
+      <view>
+        <view class="num">{{preview.taskCount}}</view>
+        <view class="muted">工序</view>
+      </view>
+      <view>
+        <view class="num warning">{{preview.warningCount}}</view>
+        <view class="muted">警告</view>
+      </view>
+      <view>
+        <view class="num danger">{{preview.errorCount}}</view>
+        <view class="muted">错误</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{parsed}}" class="card">
+    <view class="section-title">字段识别规则</view>
+    <view class="rule-block">
+      <view class="rule-title">必填基础字段</view>
+      <view class="chips">
+        <view wx:for="{{requiredFields}}" wx:key="*this" class="chip">{{item}}</view>
+      </view>
+    </view>
+    <view class="rule-block">
+      <view class="rule-title">Header validation</view>
+      <view class="muted">recognized {{headerValidation.recognizedHeaders.length}} / missing {{headerValidation.missingRequired.length}} / unknown {{headerValidation.unknownHeaders.length}}</view>
+    </view>
+    <view class="rule-block">
+      <view class="rule-title">阶段计划</view>
+      <view class="muted">{{planGroup}}</view>
+    </view>
+    <view class="rule-block">
+      <view class="rule-title">实际完成</view>
+      <view class="muted">{{actualGroup}}</view>
+    </view>
+    <view class="rule-block">
+      <view class="rule-title">阶段责任人</view>
+      <view class="muted">{{ownerGroup}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{parsed && warnings.length}}" class="card">
+    <view class="section-title">警告</view>
+    <view wx:for="{{warnings}}" wx:key="*this" class="message warning-bg">{{item}}</view>
+  </view>
+
+  <view wx:if="{{parsed && errors.length}}" class="card">
+    <view class="section-title">错误</view>
+    <view wx:for="{{errors}}" wx:key="*this" class="message danger-bg">{{item}}</view>
+  </view>
+
+  <view wx:if="{{parsed && rowIssues.length}}" class="card">
+    <view class="section-title">行问题明细</view>
+    <view wx:for="{{rowIssues}}" wx:key="row" class="issue-row">
+      <view class="issue-head">
+        <view class="issue-title">第 {{item.row}} 行</view>
+        <view class="tag danger-tag" wx:if="{{item.errors.length}}">{{item.errors.length}} 个错误</view>
+        <view class="tag warning-tag" wx:elif="{{item.warnings.length}}">{{item.warnings.length}} 个警告</view>
+      </view>
+      <view class="muted">{{item.detailText}}</view>
+      <view wx:for="{{item.errors}}" wx:for-item="err" wx:key="*this" class="issue-text danger">{{err}}</view>
+      <view wx:for="{{item.warnings}}" wx:for-item="warn" wx:key="*this" class="issue-text warning">{{warn}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{parsed}}" class="card">
+    <view class="section-title">明细示例</view>
+    <view wx:for="{{detailRows}}" wx:key="rowKey" class="detail-row">
+      <view>
+        <view class="detail-title">{{item.deviceNo}} · {{item.process}}</view>
+        <view class="muted">{{item.projectNo}} · {{item.department}} · 截止 {{item.due}}</view>
+      </view>
+      <view class="tag">{{item.status}}</view>
+    </view>
+  </view>
+
+  <view class="bottom-actions">
+    <button class="submit-btn" bindtap="confirmImport" loading="{{isImporting}}" disabled="{{isBusy}}">确认导入</button>
+  </view>
+  <bottom-nav />
+</view>

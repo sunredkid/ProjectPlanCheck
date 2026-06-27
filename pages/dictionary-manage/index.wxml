@@ -1,0 +1,46 @@
+﻿<view class="page">
+  <view class="title">字典管理</view>
+  <view class="subtitle">工序、参数分类、QB分类、用户角色等枚举值维护</view>
+
+  <view class="tabs">
+    <view
+      wx:for="{{dictTabs}}"
+      wx:key="key"
+      class="tab {{activeDict === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchDict"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="card">
+    <view wx:for="{{items}}" wx:key="index" class="dict-row">
+      <view wx:if="{{editingIndex === index}}">
+        <input class="edit-input" value="{{editValue}}" bindinput="onEditInput" focus="{{true}}" />
+        <view class="edit-actions">
+          <button size="mini" class="main-btn" bindtap="saveEdit">保存</button>
+          <button size="mini" bindtap="cancelEdit">取消</button>
+        </view>
+      </view>
+      <view wx:else class="dict-item">
+        <view class="dict-text">{{item}}</view>
+        <view class="dict-actions">
+          <text class="action-link" data-index="{{index}}" bindtap="startEdit">编辑</text>
+          <text class="action-link danger" data-index="{{index}}" bindtap="deleteItem">删除</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{editingIndex === -1}}" class="add-row">
+      <input class="edit-input" value="{{editValue}}" bindinput="onEditInput" placeholder="输入新条目" />
+      <button size="mini" class="main-btn" bindtap="saveEdit">添加</button>
+    </view>
+    <view wx:else class="add-row">
+      <button size="mini" bindtap="startAdd">+ 新增条目</button>
+    </view>
+  </view>
+
+  <view class="card note">
+    <view class="muted">说明：当前为开发阶段原型，对字典的编辑暂时停留在页面内存中，正式版将对接到云数据库字典表。</view>
+  </view>
+</view>
+<bottom-nav />

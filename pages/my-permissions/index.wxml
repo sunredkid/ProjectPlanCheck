@@ -1,0 +1,23 @@
+﻿<view class="page">
+  <view class="title">我的权限</view>
+  <view class="subtitle">当前角色拥有的系统权限明细</view>
+
+  <view class="card profile">
+    <view class="avatar">{{user.name ? user.name.substring(0, 1) : '?'}}</view>
+    <view>
+      <view class="name">{{user.name}}</view>
+      <view class="muted">部门：{{user.department}}</view>
+      <view class="muted">角色：{{user.roleLabel}}</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view wx:for="{{permissions}}" wx:key="key" class="perm-row">
+      <view class="perm-label">{{item.label}}</view>
+      <view class="perm-value {{item.granted ? 'granted' : 'denied'}}">
+        {{item.granted ? '已授予' : '未授予'}}
+      </view>
+    </view>
+  </view>
+</view>
+<bottom-nav />

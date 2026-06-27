@@ -1,0 +1,60 @@
+.label {
+  color: #0b7a75;
+  font-size: 24rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.qb-no {
+  font-size: 38rpx;
+  font-weight: 800;
+  margin-bottom: 10rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 800;
+  margin-bottom: 18rpx;
+}
+
+.user-row {
+  padding: 22rpx;
+  border-radius: 16rpx;
+  background: #f9fafb;
+  margin-bottom: 14rpx;
+  font-size: 28rpx;
+}
+
+.user-row.active {
+  background: #0b7a75;
+  color: #ffffff;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 180rpx;
+  background: #f9fafb;
+  border-radius: 14rpx;
+  padding: 18rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+}
+
+.bottom-actions {
+  position: sticky;
+  bottom: 0;
+  padding: 18rpx 0 28rpx;
+  background: #f5f7fa;
+}
+
+.submit-btn {
+  background: #0b7a75;
+  color: #ffffff;
+  border-radius: 999rpx;
+}
+
+
+
+
+.state-card { padding: 40rpx 28rpx; text-align: center; }
+.state-title { color: #111827; font-size: 30rpx; font-weight: 700; margin-bottom: 10rpx; }

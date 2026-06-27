@@ -1,0 +1,49 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">项目编辑加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card">
+    <view class="title">{{title}}</view>
+    <view class="muted">除湿机项目基础信息，后续设备和工序可通过导入或派单继续补齐。</view>
+  </view>
+
+  <view class="card">
+    <view class="field">
+      <view class="field-label">项目号 *</view>
+      <input class="input {{isEdit ? 'readonly' : ''}}" value="{{form.projectNo}}" data-field="projectNo" bindinput="setField" disabled="{{isEdit}}" placeholder="例如 C26-0601" />
+    </view>
+    <view class="field">
+      <view class="field-label">项目名称 *</view>
+      <input class="input" value="{{form.name}}" data-field="name" bindinput="setField" placeholder="请输入项目名称" />
+    </view>
+    <view class="field">
+      <view class="field-label">客户</view>
+      <input class="input" value="{{form.customer}}" data-field="customer" bindinput="setField" placeholder="请输入客户名称" />
+    </view>
+    <view class="field">
+      <view class="field-label">进度管理员</view>
+      <input class="input" value="{{form.admin}}" data-field="admin" bindinput="setField" placeholder="请输入进度管理员" />
+    </view>
+    <view class="field">
+      <view class="field-label">计划发货</view>
+      <picker mode="date" value="{{form.shipDate}}" bindchange="onShipDateChange">
+        <view class="picker-value">{{form.shipDate}}</view>
+      </picker>
+    </view>
+    <view class="field">
+      <view class="field-label">状态</view>
+      <view class="chips">
+        <view wx:for="{{statuses}}" wx:key="*this" class="chip {{form.status === item ? 'active' : ''}}" data-value="{{item}}" bindtap="chooseStatus">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-actions">
+    <button class="submit-btn" bindtap="save" loading="{{isSaving}}" disabled="{{isSaving}}">保存</button>
+  </view>
+  </block>
+</view>
+<bottom-nav />

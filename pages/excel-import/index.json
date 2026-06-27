@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "Excel导入",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

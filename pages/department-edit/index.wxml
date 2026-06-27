@@ -1,0 +1,42 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">部门编辑加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="title">{{title}}</view>
+      <view class="muted">部门管理员可在部门内派单。</view>
+    </view>
+
+    <view class="card">
+      <view class="field">
+        <view class="field-label">部门名称 *</view>
+        <input class="input" value="{{form.name}}" data-field="name" bindinput="setField" placeholder="请输入部门名称" />
+      </view>
+      <view class="field">
+        <view class="field-label">部门管理员，可多选</view>
+        <view class="chips">
+          <view wx:for="{{users}}" wx:key="*this" class="chip {{form.managers.indexOf(item) >= 0 ? 'active' : ''}}" data-name="{{item}}" bindtap="toggleManager">{{item}}</view>
+        </view>
+      </view>
+      <view class="field">
+        <view class="field-label">排序</view>
+        <input class="input" type="number" value="{{form.sort}}" data-field="sort" bindinput="setField" />
+      </view>
+      <view class="field">
+        <view class="field-label">状态</view>
+        <view class="chips">
+          <view wx:for="{{statuses}}" wx:key="*this" class="chip {{form.status === item ? 'active' : ''}}" data-value="{{item}}" bindtap="chooseStatus">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="bottom-actions">
+      <button class="submit-btn" bindtap="save" loading="{{isSaving}}" disabled="{{isSaving}}">保存</button>
+    </view>
+  </block>
+
+  <bottom-nav />
+</view>

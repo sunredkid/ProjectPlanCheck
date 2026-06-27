@@ -1,0 +1,91 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">进度提交加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+  <view class="card task-card">
+    <view class="label">当前任务</view>
+    <view class="task-title">{{task.process}}</view>
+    <view class="muted">项目：{{task.project}}</view>
+    <view class="muted">设备：{{task.device}}</view>
+    <view class="muted">负责人：{{task.owner}}</view>
+    <view class="muted">计划截止：{{task.plannedDueDate}}</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">更新后状态</view>
+    <view class="status-list">
+      <view
+        wx:for="{{statusOptions}}"
+        wx:key="*this"
+        class="status-option {{status === item ? 'active' : ''}}"
+        data-value="{{item}}"
+        bindtap="chooseStatus"
+      >
+        {{item}}
+      </view>
+    </view>
+  </view>
+
+  <view class="card form-card">
+    <view class="field">
+      <view class="field-label">实际开始日期</view>
+      <picker mode="date" value="{{actualStartDate}}" bindchange="onStartDateChange">
+        <view class="picker-value">{{actualStartDateText}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="field-label">实际完成日期</view>
+      <picker mode="date" value="{{actualFinishDate}}" bindchange="onFinishDateChange">
+        <view class="picker-value">{{actualFinishDateText}}</view>
+      </picker>
+    </view>
+
+    <view class="field">
+      <view class="field-label">完成数量</view>
+      <input class="input" type="number" value="{{quantity}}" bindinput="onQuantityInput" placeholder="例如 1" />
+    </view>
+
+    <view class="field">
+      <view class="field-label">备注</view>
+      <textarea class="textarea" value="{{remark}}" bindinput="onRemarkInput" placeholder="填写当前进展、卡点、需要协助的地方" />
+    </view>
+
+    <view class="field">
+      <view class="field-label">图片 / 附件</view>
+      <button class="upload-btn" bindtap="chooseImage">上传图片或附件</button>
+      <view wx:if="{{attachments.length}}" class="attachment-list">
+        <view wx:for="{{attachments}}" wx:key="id" class="attachment-row">
+          <view class="attachment-main" data-index="{{index}}" bindtap="previewAttachment">
+            <view class="attachment-icon">{{item.icon}}</view>
+            <view>
+              <view class="attachment-name">{{item.name}}</view>
+              <view class="att-meta-row">
+              <view class="att-cat-tag">{{item.category || "图纸"}}</view>
+              <view wx:if="{{item.uploaded}}" class="muted cloud-mark">云已上传</view>
+              <view wx:else class="muted">{{item.type === 'image' ? '点击预览图片' : '点击打开文件'}}</view>
+            </view>
+            </view>
+          </view>
+          <button size="mini" class="remove-btn" data-index="{{index}}" bindtap="removeAttachment">移除</button>
+        </view>
+      </view>
+      <view wx:if="{{isUploadingAtt}}" class="upload-progress">
+        <view class="progress-text">正在上传... {{uploadProgress}}/{{uploadTotal}}</view>
+        <progress percent="{{uploadProgress * 100 / uploadTotal}}" stroke-width="4" active />
+      </view>
+      <view wx:elif="{{attachments.length}}">
+        <button size="mini" class="ghost-btn" bindtap="uploadAttachments" disabled="{{isUploadingAtt}}">云同步到云端</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-actions">
+    <button class="submit-btn" bindtap="submit" loading="{{isSubmitting}}" disabled="{{isSubmitting}}">提交进度</button>
+  </view>
+  </block>
+</view>
+<bottom-nav />

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "QB详情",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

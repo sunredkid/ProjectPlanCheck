@@ -1,0 +1,152 @@
+<view class="page">
+  <view class="title">我的</view>
+
+  <view class="card profile">
+    <view class="avatar">{{user.avatarText}}</view>
+    <view>
+      <view class="name">{{user.name}}</view>
+      <view class="muted">部门：{{user.department}}</view>
+      <view class="muted">角色：{{user.roleLabel}}</view>
+      <view class="muted">手机号：{{user.phone}}</view>
+      <view class="muted">环境：{{authState.envVersion}}</view>
+    </view>
+  </view>
+
+  <view class="section-title">数据同步</view>
+  <view class="card cloud-card">
+    <view class="cloud-head">
+      <view>
+        <view class="cloud-title">{{cloudStatus.userTitle}}</view>
+        <view class="muted">{{cloudStatus.userDesc}}</view>
+        <view class="muted">最近同步：{{cloudStatus.lastSyncAt}}</view>
+      </view>
+      <view class="cloud-badge {{cloudStatus.statusClass}}">{{cloudStatus.connectionLabel}}</view>
+    </view>
+    <view wx:if="{{canViewCloudOps}}" class="cloud-ops-toggle" bindtap="toggleCloudOps">
+      {{cloudOpsExpanded ? '收起运维诊断' : '展开运维诊断'}}
+    </view>
+    <view wx:if="{{canViewCloudOps && cloudOpsExpanded}}" class="cloud-grid">
+      <view class="cloud-row">
+        <view class="cloud-label">后端</view>
+        <view class="cloud-value">{{cloudStatus.active}} / 加载 {{cloudStatus.loadLabel}} / 同步 {{cloudStatus.syncLabel}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">诊断</view>
+        <view class="cloud-value">{{cloudStatus.healthLabel}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">云环境</view>
+        <view class="cloud-value">{{cloudStatus.envId}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">传输</view>
+        <view class="cloud-value">{{cloudStatus.transport}} / {{cloudStatus.cloudFunctionName}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">集合</view>
+        <view class="cloud-value">{{cloudStatus.storeCollection}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">文档</view>
+        <view class="cloud-value">{{cloudStatus.storeDocId}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">诊断文档</view>
+        <view class="cloud-value">{{cloudStatus.healthDocId}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">最近拉取</view>
+        <view class="cloud-value">{{cloudStatus.lastLoadAt}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">最近同步</view>
+        <view class="cloud-value">{{cloudStatus.lastSyncAt}}</view>
+      </view>
+      <view class="cloud-row">
+        <view class="cloud-label">最近诊断</view>
+        <view class="cloud-value">{{cloudStatus.lastHealthAt}}</view>
+      </view>
+      <view wx:if="{{cloudStatus.healthSteps.length}}" class="cloud-row cloud-health">
+        <view class="cloud-label">诊断结果</view>
+        <view class="cloud-value">
+          <view
+            wx:for="{{cloudStatus.healthSteps}}"
+            wx:key="key"
+            class="health-step {{item.ok ? 'success' : 'danger'}}"
+          >
+            {{item.ok ? '通过' : '失败'}} {{item.key}} {{item.message}}
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{cloudStatus.healthSteps.length}}" class="cloud-row">
+        <view class="cloud-label">结构检查</view>
+        <view class="cloud-value {{cloudStatus.schemaOk ? 'success' : 'danger'}}">
+          v{{cloudStatus.schemaVersion}} / 缺失 {{cloudStatus.schemaMissingCount}} / 修复 {{cloudStatus.schemaRepairedCount}} / 类型错误 {{cloudStatus.schemaTypeIssueCount}} / 未知 {{cloudStatus.schemaUnknownCount}}
+        </view>
+      </view>
+      <view wx:if="{{cloudStatus.hasPendingSync}}" class="cloud-row">
+        <view class="cloud-label">状态</view>
+        <view class="cloud-value warning">有待同步写入</view>
+      </view>
+      <view wx:if="{{cloudStatus.lastError}}" class="cloud-row">
+        <view class="cloud-label">错误</view>
+        <view class="cloud-value danger">{{cloudStatus.lastError}}</view>
+      </view>
+    </view>
+    <view wx:if="{{canViewCloudOps && cloudOpsExpanded}}" class="cloud-actions">
+      <button size="mini" class="cloud-btn" loading="{{isCloudBusy}}" bindtap="reconnectCloud">重连</button>
+      <button size="mini" class="cloud-btn" loading="{{isCloudBusy}}" bindtap="refreshCloudStore">拉取</button>
+      <button size="mini" class="cloud-btn" loading="{{isCloudBusy}}" bindtap="checkCloudHealth">诊断</button>
+      <button size="mini" class="cloud-btn primary" loading="{{isCloudBusy}}" bindtap="syncCloudStore">同步</button>
+    </view>
+  </view>
+
+  <view wx:if="{{mockPreviewEnabled}}" class="section-title">开发阶段：切换角色预览</view>
+  <view wx:if="{{mockPreviewEnabled}}" class="card">
+    <view
+      wx:for="{{previewUsers}}"
+      wx:key="roleLabel"
+      class="mock-user {{user.roleLabel === item.roleLabel ? 'active' : ''}}"
+      data-index="{{index}}"
+      bindtap="switchMockUser"
+    >
+      <view>
+        <view class="mock-name">{{item.roleLabel}}</view>
+        <view class="muted">{{item.name}}｜{{item.department}}</view>
+      </view>
+      <view wx:if="{{user.roleLabel === item.roleLabel}}" class="selected">当前</view>
+    </view>
+  </view>
+
+  <view wx:else class="card release-note">
+    <view class="menu">正式版角色预览已关闭</view>
+  </view>
+
+  <view class="card">
+    <view
+      wx:for="{{selfMenus}}"
+      wx:key="name"
+      class="menu"
+      data-name="{{item.name}}"
+      data-url="{{item.url}}"
+      bindtap="openSelfMenu"
+    >
+      {{item.name}}
+    </view>
+  </view>
+
+  <view wx:if="{{isSuperAdmin}}" class="section-title">后台管理入口</view>
+  <view wx:if="{{isSuperAdmin}}" class="card">
+    <view
+      wx:for="{{adminMenus}}"
+      wx:key="name"
+      class="menu"
+      data-name="{{item.name}}"
+      data-url="{{item.url}}"
+      bindtap="openMenu"
+    >
+      {{item.name}}
+    </view>
+  </view>
+</view>
+<bottom-nav />

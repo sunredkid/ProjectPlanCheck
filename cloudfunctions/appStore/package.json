@@ -1,0 +1,9 @@
+{
+  "name": "appStore",
+  "version": "1.0.0",
+  "description": "Production progress mini-program cloud snapshot service.",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

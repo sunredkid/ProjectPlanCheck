@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "设备编辑",
+  "usingComponents": {
+    "bottom-nav": "/components/bottom-nav/index"
+  }
+}

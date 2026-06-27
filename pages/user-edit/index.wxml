@@ -1,0 +1,55 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="card state-card">
+    <view class="state-title">用户编辑加载失败</view>
+    <view class="muted">{{loadError}}</view>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <view class="title">{{title}}</view>
+      <view class="muted">手机号用于后续登录权限识别。</view>
+    </view>
+
+    <view class="card">
+      <view class="field">
+        <view class="field-label">姓名 *</view>
+        <input class="input" value="{{form.name}}" data-field="name" bindinput="setField" placeholder="请输入姓名" />
+      </view>
+      <view class="field">
+        <view class="field-label">手机号 *</view>
+        <input class="input" type="number" value="{{form.phone}}" data-field="phone" bindinput="setField" placeholder="请输入手机号" />
+      </view>
+      <view class="field">
+        <view class="field-label">部门</view>
+        <view class="chips">
+          <view wx:for="{{departments}}" wx:key="*this" class="chip {{form.department === item ? 'active' : ''}}" data-field="department" data-value="{{item}}" bindtap="chooseOption">{{item}}</view>
+        </view>
+      </view>
+      <view class="field">
+        <view class="field-label">角色</view>
+        <view class="chips">
+          <view wx:for="{{roles}}" wx:key="*this" class="chip {{form.role === item ? 'active' : ''}}" data-field="role" data-value="{{item}}" bindtap="chooseOption">{{item}}</view>
+        </view>
+      </view>
+      <view class="field row-field" bindtap="toggleManager">
+        <view>
+          <view class="field-label">是否部门管理员</view>
+          <view class="muted">开启后可进行部门内派单</view>
+        </view>
+        <view class="switch {{form.isManager ? 'on' : ''}}">{{form.isManager ? '是' : '否'}}</view>
+      </view>
+      <view class="field">
+        <view class="field-label">状态</view>
+        <view class="chips">
+          <view wx:for="{{statuses}}" wx:key="*this" class="chip {{form.status === item ? 'active' : ''}}" data-field="status" data-value="{{item}}" bindtap="chooseOption">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="bottom-actions">
+      <button class="submit-btn" bindtap="save" loading="{{isSaving}}" disabled="{{isSaving}}">保存</button>
+    </view>
+  </block>
+
+  <bottom-nav />
+</view>

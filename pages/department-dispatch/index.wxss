@@ -1,0 +1,56 @@
+.label {
+  color: #0b7a75;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 800;
+  margin: 8rpx 0 12rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 800;
+  margin-bottom: 18rpx;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.chip {
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: 25rpx;
+}
+
+.chip.active {
+  background: #0b7a75;
+  color: #ffffff;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 150rpx;
+  background: #f9fafb;
+  border-radius: 14rpx;
+  padding: 18rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+}
+
+.submit-btn {
+  background: #0b7a75;
+  color: #ffffff;
+  border-radius: 999rpx;
+}
+
+
+.state-card { padding: 40rpx 28rpx; text-align: center; }
+.state-title { color: #111827; font-size: 30rpx; font-weight: 700; margin-bottom: 10rpx; }
