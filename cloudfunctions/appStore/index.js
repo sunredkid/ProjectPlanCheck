@@ -261,42 +261,30 @@ async function login(event = {}, context = {}) {
   };
 }
 
-
-async function sendTemplateMsg(event = {}) {
-  const { touser, templateId, page, data, emphasisKeyword } = event;
-
-  if (!touser || !templateId) {
-    return { ok: false, message: "Missing touser or templateId." };
-  }
-
-  try {
-    const sendData = {
-      touser,
-      templateId,
-      page: page || "",
-      data: data || {},
-      miniprogramState: "developer"  // Change to "formal" for release.
-    };
-
-    if (emphasisKeyword) {
-      sendData.emphasisKeyword = emphasisKeyword;
-    }
-
-    await cloud.openapi.subscribeMessage.send(sendData);
-
-    return {
-      ok: true,
-      message: "Template message sent.",
-      touser,
-      templateId
-    };
-  } catch (error) {
+async function downloadTemplateFile(event = {}) {
+  const fileID = String(event.fileID || "").trim();
+  if (!fileID || !/\/templates\/progress-import-v4\.xlsx$/.test(fileID)) {
     return {
       ok: false,
-      message: error.errMsg || error.message || "Failed to send template message.",
-      code: error.errCode || ""
+      message: "Invalid template fileID."
     };
   }
+
+  const res = await cloud.downloadFile({ fileID });
+  const fileContent = res && res.fileContent;
+  if (!fileContent) {
+    return {
+      ok: false,
+      message: "Template file is empty."
+    };
+  }
+
+  return {
+    ok: true,
+    fileName: "progress-import-v4.xlsx",
+    encoding: "base64",
+    contentBase64: Buffer.from(fileContent).toString("base64")
+  };
 }
 
 exports.main = async (event = {}, context = {}) => {
@@ -315,6 +303,9 @@ exports.main = async (event = {}, context = {}) => {
     }
     if (action === "login") {
       return await login(event, wxContext);
+    }
+    if (action === "downloadTemplateFile") {
+      return await downloadTemplateFile(event);
     }
     return {
       ok: false,

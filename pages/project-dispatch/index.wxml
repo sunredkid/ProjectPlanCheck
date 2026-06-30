@@ -37,7 +37,7 @@
     </view>
 
     <view class="field">
-      <view class="field-label">计划截止日期</view>
+      <view class="field-label">计划完成日期</view>
       <picker mode="date" value="{{form.plannedDueDate}}" bindchange="onDateChange">
         <view class="picker-value">{{form.plannedDueDate}}</view>
       </picker>

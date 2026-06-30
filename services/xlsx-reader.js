@@ -97,7 +97,7 @@ function parseAttributes(tag = "") {
 
 function parseRelationships(xml = "") {
   const rels = {};
-  xml.replace(/<Relationship\b([^>]*)\/?>/g, (match, attrsText) => {
+  xml.replace(/<(?:\w+:)?Relationship\b([^>]*)\/?>/g, (match, attrsText) => {
     const attrs = parseAttributes(attrsText);
     if (attrs.Id && attrs.Target) rels[attrs.Id] = attrs.Target;
     return match;
@@ -107,7 +107,7 @@ function parseRelationships(xml = "") {
 
 function findWorkbookPath(files) {
   const contentTypes = getZipText(files, "[Content_Types].xml");
-  const match = contentTypes.match(/<Override\b([^>]*ContentType="application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet\.main\+xml"[^>]*)\/?>/);
+  const match = contentTypes.match(/<(?:\w+:)?Override\b([^>]*ContentType="application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet\.main\+xml"[^>]*)\/?>/);
   if (match) {
     const attrs = parseAttributes(match[1]);
     if (attrs.PartName) return normalizePath(attrs.PartName);
@@ -121,7 +121,7 @@ function parseWorkbook(files, workbookPath) {
   const rels = parseRelationships(getZipText(files, relsPath));
   const sheets = [];
 
-  workbookXml.replace(/<sheet\b([^>]*)\/?>/g, (match, attrsText) => {
+  workbookXml.replace(/<(?:\w+:)?sheet\b([^>]*)\/?>/g, (match, attrsText) => {
     const attrs = parseAttributes(attrsText);
     const relId = attrs["r:id"];
     if (attrs.name && relId && rels[relId]) {
@@ -141,9 +141,9 @@ function parseSharedStrings(files) {
   if (!xml) return [];
   const strings = [];
 
-  xml.replace(/<si\b[^>]*>([\s\S]*?)<\/si>/g, (match, body) => {
+  xml.replace(/<(?:\w+:)?si\b[^>]*>([\s\S]*?)<\/(?:\w+:)?si>/g, (match, body) => {
     const parts = [];
-    body.replace(/<t\b[^>]*>([\s\S]*?)<\/t>/g, (textMatch, text) => {
+    body.replace(/<(?:\w+:)?t\b[^>]*>([\s\S]*?)<\/(?:\w+:)?t>/g, (textMatch, text) => {
       parts.push(decodeXml(text));
       return textMatch;
     });
@@ -159,7 +159,7 @@ function parseStyles(files) {
   const dateNumFmtIds = new Set([14, 15, 16, 17, 22, 27, 30, 36, 45, 46, 47, 50, 57]);
   const customDateFmtIds = new Set();
 
-  xml.replace(/<numFmt\b([^>]*)\/?>/g, (match, attrsText) => {
+  xml.replace(/<(?:\w+:)?numFmt\b([^>]*)\/?>/g, (match, attrsText) => {
     const attrs = parseAttributes(attrsText);
     const id = Number(attrs.numFmtId);
     const code = String(attrs.formatCode || "").toLowerCase();
@@ -168,9 +168,9 @@ function parseStyles(files) {
   });
 
   const styleDateFlags = [];
-  const cellXfsMatch = xml.match(/<cellXfs\b[^>]*>([\s\S]*?)<\/cellXfs>/);
+  const cellXfsMatch = xml.match(/<(?:\w+:)?cellXfs\b[^>]*>([\s\S]*?)<\/(?:\w+:)?cellXfs>/);
   const cellXfsXml = cellXfsMatch ? cellXfsMatch[1] : "";
-  cellXfsXml.replace(/<xf\b([^>]*)\/?>/g, (match, attrsText) => {
+  cellXfsXml.replace(/<(?:\w+:)?xf\b([^>]*)\/?>/g, (match, attrsText) => {
     const attrs = parseAttributes(attrsText);
     const id = Number(attrs.numFmtId || 0);
     styleDateFlags.push(dateNumFmtIds.has(id) || customDateFmtIds.has(id));
@@ -202,14 +202,14 @@ function excelDateToString(value) {
 
 function getCellValue(cellXml, attrs, sharedStrings, styleDateFlags) {
   const type = attrs.t || "";
-  const valueMatch = cellXml.match(/<v\b[^>]*>([\s\S]*?)<\/v>/);
-  const inlineMatch = cellXml.match(/<is\b[^>]*>([\s\S]*?)<\/is>/);
+  const valueMatch = cellXml.match(/<(?:\w+:)?v\b[^>]*>([\s\S]*?)<\/(?:\w+:)?v>/);
+  const inlineMatch = cellXml.match(/<(?:\w+:)?is\b[^>]*>([\s\S]*?)<\/(?:\w+:)?is>/);
   const rawValue = valueMatch ? decodeXml(valueMatch[1]) : "";
 
   if (type === "s") return sharedStrings[Number(rawValue)] || "";
   if (type === "inlineStr" && inlineMatch) {
     const texts = [];
-    inlineMatch[1].replace(/<t\b[^>]*>([\s\S]*?)<\/t>/g, (match, text) => {
+    inlineMatch[1].replace(/<(?:\w+:)?t\b[^>]*>([\s\S]*?)<\/(?:\w+:)?t>/g, (match, text) => {
       texts.push(decodeXml(text));
       return match;
     });
@@ -226,10 +226,10 @@ function parseWorksheetRows(files, sheetPath, sharedStrings, styleDateFlags) {
   const xml = getZipText(files, sheetPath);
   const rows = [];
 
-  xml.replace(/<row\b[^>]*>([\s\S]*?)<\/row>/g, (rowMatch, rowBody) => {
+  xml.replace(/<(?:\w+:)?row\b[^>]*>([\s\S]*?)<\/(?:\w+:)?row>/g, (rowMatch, rowBody) => {
     const row = [];
-    rowBody.replace(/<c\b([^>]*)>([\s\S]*?)<\/c>|<c\b([^>]*)\/>/g, (cellMatch, attrsTextA, body, attrsTextB) => {
-      const attrs = parseAttributes(attrsTextA || attrsTextB || "");
+    rowBody.replace(/<(?:\w+:)?c\b([^>]*)\/>|<(?:\w+:)?c\b([^>]*)>([\s\S]*?)<\/(?:\w+:)?c>/g, (cellMatch, attrsTextSelfClosing, attrsTextPaired, body) => {
+      const attrs = parseAttributes(attrsTextSelfClosing || attrsTextPaired || "");
       const columnIndex = columnToIndex(attrs.r || "");
       row[columnIndex] = getCellValue(cellMatch, attrs, sharedStrings, styleDateFlags);
       return cellMatch;

@@ -64,6 +64,11 @@
   margin: 18rpx 0;
 }
 
+.late-finish {
+  color: #dc2626;
+  font-weight: 700;
+}
+
 .main-btn {
   margin: 0;
   background: #0b7a75;

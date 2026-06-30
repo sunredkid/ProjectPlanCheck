@@ -9,3 +9,9 @@
 .edit-actions { display: flex; gap: 6px; margin-top: 4px; }
 .add-row { margin-top: 10px; display: flex; gap: 8px; align-items: center; }
 .note { margin-top: 12px; }
+.library-card { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+.library-card:last-child { border-bottom: none; }
+.library-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.department-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.department-chip { padding: 5px 10px; border-radius: 999px; font-size: 13px; color: #667085; background: #f3f4f6; }
+.department-chip.active { color: #fff; background: #0B7A75; }

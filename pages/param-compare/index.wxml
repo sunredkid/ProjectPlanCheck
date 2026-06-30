@@ -1,9 +1,9 @@
 <view class="page">
   <view class="title">参数对比</view>
-  <view class="subtitle">选择2-5台设备，并排对比参数值。差异值标红。</view>
+  <view class="subtitle">选择设备进行差异对比，也可以按项目、下单时间和参数值导出参数表。</view>
 
   <view class="card">
-    <view class="section-label">选择设备</view>
+    <view class="section-label">设备对比</view>
     <view class="device-grid">
       <view
         wx:for="{{allDevices}}"
@@ -20,8 +20,76 @@
     <view class="compare-actions">
       <button size="mini" class="main-btn" bindtap="startCompare" disabled="{{selectedIds.length < 2}}">开始对比</button>
       <button size="mini" class="reset-btn" bindtap="resetCompare">重置</button>
-      <button wx:if="{{showResult}}" size="mini" class="ghost-btn" bindtap="exportCSV">导出 CSV</button>
     </view>
+  </view>
+
+  <view class="card export-card">
+    <view class="section-label">导出参数表</view>
+    <view class="segmented">
+      <view class="seg-item {{exportMode === 'project' ? 'active' : ''}}" data-mode="project" bindtap="switchExportMode">按项目名</view>
+      <view class="seg-item {{exportMode === 'date' ? 'active' : ''}}" data-mode="date" bindtap="switchExportMode">按下单时间</view>
+    </view>
+
+    <view wx:if="{{exportMode === 'project'}}" class="form-row">
+      <view class="form-label">项目</view>
+      <picker mode="selector" range="{{exportProjects}}" range-key="projectNo" bindchange="onProjectPickerChange">
+        <view class="picker-box">{{exportProjectNo || '请选择项目'}}</view>
+      </picker>
+    </view>
+
+    <view wx:if="{{exportMode === 'date'}}" class="date-grid">
+      <view class="form-row">
+        <view class="form-label">开始日期</view>
+        <picker mode="date" value="{{exportStartDate}}" bindchange="onStartDateChange">
+          <view class="picker-box">{{exportStartDate || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="form-row">
+        <view class="form-label">结束日期</view>
+        <picker mode="date" value="{{exportEndDate}}" bindchange="onEndDateChange">
+          <view class="picker-box">{{exportEndDate || '请选择'}}</view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="section-sub">项目 - 设备</view>
+    <view wx:for="{{exportProjects}}" wx:key="projectNo" wx:for-item="project">
+      <view wx:if="{{exportMode === 'date' || project.projectNo === exportProjectNo}}" class="project-picker-block">
+        <view class="project-line">
+          <view class="project-main">{{project.projectNo}}</view>
+          <view class="project-sub">{{project.projectName}}｜{{project.adminOrderDate}}</view>
+        </view>
+        <view class="device-grid small">
+          <view
+            class="device-chip {{project.allSelected ? 'selected' : ''}}"
+            data-project-no="{{project.projectNo}}"
+            bindtap="toggleExportAllDevices"
+          >全部设备</view>
+          <view
+            wx:for="{{project.devices}}"
+            wx:key="id"
+            wx:for-item="dev"
+            class="device-chip {{dev.selected ? 'selected' : ''}}"
+            data-project-no="{{project.projectNo}}"
+            data-device-id="{{dev.id}}"
+            bindtap="toggleExportDevice"
+          >{{dev.deviceNo}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-sub">参数值筛选</view>
+    <view class="param-filter-grid">
+      <view
+        wx:for="{{paramNameOptions}}"
+        wx:key="name"
+        class="param-chip {{item.selected ? 'selected' : ''}}"
+        data-name="{{item.name}}"
+        bindtap="toggleFilterParam"
+      >{{item.name}}</view>
+    </view>
+    <input class="export-input" value="{{filterValue}}" bindinput="onFilterValueInput" placeholder="设定值，例如 53 m3/h；留空则不按参数值筛选" />
+    <button class="main-btn export-btn" loading="{{exporting}}" bindtap="exportParamExcel">导出 Excel</button>
   </view>
 
   <view wx:if="{{showResult && compareResult}}" class="result-section">
@@ -58,7 +126,7 @@
               wx:key="index"
               class="device-col {{val.has ? '' : 'missing'}} {{val.isDiff ? 'diff-cell' : ''}}"
             >
-              {{val.value}}{{val.unit}}
+              {{val.value}}{{val.unit ? ' ' + val.unit : ''}}
             </view>
           </view>
         </block>

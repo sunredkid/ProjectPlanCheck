@@ -54,11 +54,17 @@
         <view class="muted">项目：{{item.project}}</view>
         <view class="muted">设备：{{item.device}}</view>
         <view class="muted">负责人：{{item.owner}}</view>
-        <view class="muted">计划截止：{{item.dueDate}}</view>
+        <view class="muted">计划完成：{{item.dueDate}}</view>
         <view wx:if="{{item.dueLabel}}" class="due-label {{item.urgency}}">{{item.dueLabel}}</view>
         <view class="row">
           <text class="tag">{{item.status}}</text>
-          <button size="mini" class="main-btn" data-row-key="{{item.rowKey}}" bindtap="submitProgress">提交进度</button>
+          <button
+            wx:if="{{!isDepartmentManager || item.department === currentUser.department}}"
+            size="mini"
+            class="main-btn"
+            data-row-key="{{item.rowKey}}"
+            bindtap="submitProgress"
+          >{{isDepartmentManager ? '提交项目进度' : '提交进度'}}</button>
         </view>
       </block>
 
@@ -67,7 +73,7 @@
         <view class="muted">项目：{{item.project}}</view>
         <view class="muted">设备：{{item.device}}</view>
         <view class="muted">部门：{{item.department}}</view>
-        <view class="muted">计划截止：{{item.dueDate}}</view>
+        <view class="muted">计划完成：{{item.dueDate}}</view>
         <view wx:if="{{item.dueLabel}}" class="due-label {{item.urgency}}">{{item.dueLabel}}</view>
         <view class="row">
           <text class="tag">{{item.status}}</text>
@@ -81,7 +87,7 @@
         <view class="muted">异常：{{item.title}}</view>
         <view class="row">
           <text class="tag">{{item.status}}</text>
-          <button size="mini" class="main-btn" data-qb-no="{{item.qbNo}}" bindtap="handleQb">处理QB</button>
+          <button size="mini" class="main-btn" data-qb-no="{{item.qbNo}}" bindtap="handleQb">查看QB</button>
         </view>
       </block>
     </view>

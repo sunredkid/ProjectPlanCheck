@@ -20,7 +20,7 @@
       <button size="mini" class="main-btn import-parse-btn" bindtap="parseFile" loading="{{isParsing}}" disabled="{{isBusy}}">解析预览</button>
     </view>
     <view class="button-row secondary-row">
-      <button size="mini" class="ghost-btn import-aux-btn" bindtap="downloadTemplate" disabled="{{isBusy}}">复制模板路径</button>
+      <button size="mini" class="ghost-btn import-aux-btn" bindtap="downloadTemplateFile" disabled="{{isBusy}}">下载模板</button>
       <button size="mini" class="ghost-btn import-aux-btn" bindtap="openLogs" disabled="{{isBusy}}">导入日志</button>
       <button size="mini" class="ghost-btn import-aux-btn" bindtap="chooseAcceptanceFiles" loading="{{isAccepting}}" disabled="{{isBusy}}">多样本验收</button>
     </view>
@@ -153,6 +153,26 @@
 
   <view class="bottom-actions">
     <button class="submit-btn" bindtap="confirmImport" loading="{{isImporting}}" disabled="{{isBusy}}">确认导入</button>
+  </view>
+
+  <view wx:if="{{orderDateDialogVisible}}" class="modal-mask">
+    <view class="order-dialog">
+      <view class="section-title">确认项目下单时间</view>
+      <view class="muted dialog-desc">按项目号分别确认进度管理员下单时间，导入后将按年份和月份生成存档路径。</view>
+      <view wx:for="{{projectOrderDates}}" wx:key="projectNo" class="order-row">
+        <view>
+          <view class="order-project">{{item.projectNo}}</view>
+          <view class="muted">{{item.projectName || '未填写项目名称'}}</view>
+        </view>
+        <picker mode="date" value="{{item.adminOrderDate}}" data-index="{{index}}" bindchange="onProjectOrderDateChange">
+          <view class="date-picker-value">{{item.adminOrderDate}}</view>
+        </picker>
+      </view>
+      <view class="dialog-actions">
+        <button class="ghost-btn" bindtap="cancelOrderDateDialog" disabled="{{isImporting}}">取消</button>
+        <button class="main-btn" bindtap="doConfirmImport" loading="{{isImporting}}" disabled="{{isImporting}}">确认导入</button>
+      </view>
+    </view>
   </view>
   <bottom-nav />
 </view>

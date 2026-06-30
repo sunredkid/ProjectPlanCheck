@@ -29,6 +29,8 @@ const STORE_KEY_TO_COLLECTION = {
   dispatchTasks: null,        // remain snapshot-only
   importLogs: COLLECTIONS.importLogs,
   operationLogs: COLLECTIONS.operationLogs
+  ,
+  permissions: COLLECTIONS.permissions
 };
 
 const STORE_KEYS = [
@@ -45,7 +47,8 @@ const STORE_KEYS = [
   "qbDetails",
   "importPreview",
   "importLogs",
-  "operationLogs"
+  "operationLogs",
+  "permissions"
 ];
 
 const STORE_ARRAY_KEYS = [
@@ -57,7 +60,8 @@ const STORE_ARRAY_KEYS = [
   "tasks",
   "dispatchTasks",
   "importLogs",
-  "operationLogs"
+  "operationLogs",
+  "permissions"
 ];
 
 const STORE_OBJECT_KEYS = [
@@ -538,7 +542,7 @@ function readDetailCollections() {
   const promises = keys.map((key) => {
     const collectionName = STORE_KEY_TO_COLLECTION[key];
     return new Promise((resolve) => {
-      cloudDb.collection(collectionName).get()
+      cloudDb.collection(collectionName).where({ _sourceKey: key }).get()
         .then((res) => {
           const records = (res && res.data) ? res.data.map((doc) => {
             const obj = clone(doc);

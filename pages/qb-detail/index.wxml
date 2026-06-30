@@ -12,7 +12,7 @@
       <view class="tag">{{qb.status}}</view>
       <view class="muted">当前负责人：{{qb.currentOwner}}</view>
     </view>
-    <view class="viewer-tip">当前登录：{{currentUser.name}}｜{{currentUser.department}}｜{{currentUser.role}}</view>
+    <view class="viewer-tip">QB 只读查看：建单、处理、转交和关单后续均从钉钉同步。</view>
   </view>
 
   <view class="card">
@@ -64,12 +64,6 @@
     </view>
   </view>
 
-  <view wx:if="{{canSubmitProgress}}" class="card">
-    <view class="section-title">提交处理进展</view>
-    <textarea class="textarea" value="{{progressText}}" bindinput="onProgressInput" placeholder="填写当前处理结果、需要谁配合、下一步动作" />
-    <button class="main-btn" bindtap="submitProgress" loading="{{isSubmittingProgress}}" disabled="{{isSubmittingProgress}}">提交处理进展</button>
-  </view>
-
   <view class="card">
     <view class="section-title">处理记录</view>
     <view wx:if="{{logs.length === 0}}" class="empty-tip">暂无处理记录。</view>
@@ -82,10 +76,6 @@
     </view>
   </view>
 
-  <view wx:if="{{showActions}}" class="bottom-actions {{actionLayout}}">
-    <button wx:if="{{canTransferQb}}" class="ghost-btn" bindtap="transferQb">转交</button>
-    <button wx:if="{{canCloseQb}}" class="close-btn" bindtap="closeQb" loading="{{isClosing}}" disabled="{{isClosing}}">结案确认</button>
-  </view>
   </block>
 </view>
 <bottom-nav />

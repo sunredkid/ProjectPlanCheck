@@ -44,7 +44,7 @@
       </view>
       <view class="stat-card danger">
         <view class="stat-num">{{stats.devices.delayed}}</view>
-        <view class="stat-label">已延期</view>
+        <view class="stat-label">已逾期</view>
       </view>
     </view>
 

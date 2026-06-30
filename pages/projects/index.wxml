@@ -2,12 +2,11 @@
   <view class="header">
     <view>
       <view class="title">项目总列表</view>
-      <view class="subtitle">除湿机项目试点</view>
     </view>
     <view class="header-actions">
       <button size="mini" class="ghost-btn" bindtap="openQbList">QB</button>
       <button size="mini" class="ghost-btn" bindtap="importExcel">导入</button>
-      <button size="mini" class="main-btn" bindtap="createProject">新建</button>
+      <button wx:if="{{canEditProject}}" size="mini" class="main-btn" bindtap="createProject">新建</button>
     </view>
   </view>
 
@@ -27,6 +26,16 @@
     </view>
   </view>
 
+  <picker mode="multiSelector" range="{{timeRanges}}" value="{{timeSelectorValue}}" bindchange="onTimeChange">
+    <view class="time-filter card">
+      <view>
+        <view class="time-label">下单时间</view>
+        <view class="time-desc">按进度管理员下单时间筛选</view>
+      </view>
+      <view class="time-value">{{selectedPeriodLabel}}</view>
+    </view>
+  </picker>
+
   <view wx:if="{{projects.length === 0}}" class="empty-state">
     <view class="empty-title">暂无匹配项目</view>
     <view class="empty-desc">可调整筛选条件或新建项目。</view>
@@ -38,14 +47,19 @@
         <view class="project-no">{{item.projectNo}}</view>
         <view class="project-name">{{item.name}}</view>
       </view>
-      <view class="tag">{{item.status}}</view>
+      <view class="tag project-status {{item.statusTone}}">{{item.status}}</view>
     </view>
 
     <view class="info-grid">
       <view>客户：{{item.customer}}</view>
       <view>产品线：除湿机</view>
       <view>进度管理员：{{item.admin}}</view>
-      <view>计划发货：{{item.shipDate}}</view>
+      <view>下单时间：{{item.adminOrderDate}}</view>
+      <view class="ship-date-line">
+        计划发货：{{item.shipDate}}
+        <text wx:if="{{item.shipDateSuffix}}" class="{{item.shipDateTone}}">{{item.shipDateSuffix}}</text>
+        <text wx:if="{{item.hasShipDateAdjustment}}" class="history-link" data-no="{{item.projectNo}}" bindtap="showShipDateHistory">调整记录</text>
+      </view>
     </view>
 
     <view class="progress-row">
@@ -58,13 +72,49 @@
     <view class="status-line">
       <text class="success">已完成 {{item.done}}</text>
       <text>进行中 {{item.doing}}</text>
-      <text class="{{item.delayed > 0 ? 'danger' : ''}}">延期 {{item.delayed}}</text>
+      <text class="{{item.delayed > 0 ? 'danger' : ''}}">逾期 {{item.delayed}}</text>
       <text>未开始 {{item.notStarted}}</text>
     </view>
 
     <view class="project-bottom">
       <text class="{{item.qbOpen > 0 ? 'warning' : 'muted'}}">未关闭 QB：{{item.qbOpen}}</text>
-      <button size="mini" class="main-btn" data-no="{{item.projectNo}}" bindtap="openProject">进入项目</button>
+      <view class="project-actions-inline">
+        <button wx:if="{{canEditProject}}" size="mini" class="ghost-btn" data-no="{{item.projectNo}}" bindtap="editProject">编辑项目</button>
+        <button
+          wx:if="{{canDispatchDepartment && item.canDepartmentSubmitProject}}"
+          size="mini"
+          class="ghost-btn"
+          data-no="{{item.projectNo}}"
+          data-process="{{item.departmentSubmitProcess}}"
+          data-department="{{item.departmentSubmitDepartment}}"
+          bindtap="openDepartmentProjectProgress"
+        >提交项目进度</button>
+        <button size="mini" class="main-btn" data-no="{{item.projectNo}}" bindtap="openProject">进入项目</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{shipDateHistoryVisible}}" class="modal-mask" bindtap="hideShipDateHistory">
+    <view class="history-dialog" catchtap="noop">
+      <view class="dialog-head">
+        <view>
+          <view class="dialog-title">调整记录</view>
+          <view class="dialog-subtitle">{{shipDateHistoryTitle}}</view>
+        </view>
+        <view class="dialog-close" bindtap="hideShipDateHistory">×</view>
+      </view>
+      <view class="history-table">
+        <view class="history-row history-header">
+          <view>序号</view>
+          <view>下单日期</view>
+          <view>计划发货日期</view>
+        </view>
+        <view wx:for="{{shipDateHistoryRecords}}" wx:key="index" class="history-row">
+          <view>{{item.index}}</view>
+          <view>{{item.adminOrderDate}}</view>
+          <view>{{item.shipDate}}</view>
+        </view>
+      </view>
     </view>
   </view>
   <bottom-nav />

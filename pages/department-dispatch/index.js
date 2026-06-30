@@ -1,3 +1,4 @@
+const authService = require("../../services/auth-service");
 const dataService = require("../../services/data-service");
 
 Page({
@@ -56,6 +57,7 @@ Page({
     this.setData({ isSubmitting: true });
     try {
       const result = dataService.assignDepartmentTask({
+        currentUser: authService.getCurrentUser(),
         task: this.data.task,
         selectedUser: this.data.selectedUser,
         remark: this.data.remark

@@ -2,7 +2,7 @@
   <view class="header">
     <view>
       <view class="title">用户管理</view>
-      <view class="subtitle">维护手机号、部门、角色和主管权限</view>
+      <view class="subtitle">维护手机号、业务部门、后台权限角色和历史标记</view>
     </view>
     <button size="mini" class="main-btn" bindtap="addUser">新增用户</button>
   </view>
@@ -27,7 +27,7 @@
     <view class="info-grid">
       <view>部门：{{item.department}}</view>
       <view>角色：{{item.role}}</view>
-      <view>部门管理员：{{item.isManager ? '是' : '否'}}</view>
+      <view>历史主管标记：{{item.isManager ? '是' : '否'}}</view>
     </view>
     <view class="actions">
       <button size="mini" class="ghost-btn" data-id="{{item.id}}" bindtap="editUser">编辑</button>

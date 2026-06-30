@@ -1,4 +1,5 @@
 const importService = require("../../services/import-service");
+const cloudConfig = require("../../services/cloud-config");
 
 Page({
   data: {
@@ -23,6 +24,8 @@ Page({
     errors: [],
     rowIssues: [],
     detailRows: [],
+    orderDateDialogVisible: false,
+    projectOrderDates: [],
     acceptanceParsed: false,
     acceptanceSummary: {
       total: 0,
@@ -72,7 +75,7 @@ Page({
       .map((item) => item.header);
 
     this.setData({
-      "preview.templateVersion": "单台设备生产进度统一跟踪表 v3",
+      "preview.templateVersion": "单台设备生产进度统一跟踪表 v4",
       "preview.standardSheet": template.sheetName,
       requiredFields,
       templateInfo: template
@@ -105,28 +108,160 @@ Page({
     this.useSampleFile();
   },
 
-  downloadTemplate() {
+  downloadTemplateFile() {
     const template = importService.getTemplateDownloadInfo();
     this.setData({ templateInfo: template });
 
-    if (wx.setClipboardData) {
-      wx.setClipboardData({
-        data: template.path,
-        success: () => wx.showToast({ title: "template path copied", icon: "success" })
+    if (template.cloudFileID) {
+      this.downloadCloudTemplate(template);
+      return;
+    }
+
+    if (template.httpsUrl) {
+      this.downloadHttpsTemplate(template);
+      return;
+    }
+
+    this.openLocalDevTemplate(template);
+  },
+
+  openDownloadedTemplate(filePath, template = {}) {
+    if (!filePath || !wx.openDocument) {
+      wx.showToast({ title: "无法打开模板", icon: "none" });
+      return;
+    }
+    wx.openDocument({
+      filePath,
+      fileType: "xlsx",
+      showMenu: true,
+      fail: () => wx.showToast({ title: "模板打开失败", icon: "none" })
+    });
+  },
+
+  downloadCloudTemplate(template) {
+    if (!wx.cloud || !wx.cloud.downloadFile) {
+      wx.showToast({ title: "当前环境不支持云下载", icon: "none" });
+      return;
+    }
+    wx.showLoading({ title: "下载模板中" });
+    wx.cloud.downloadFile({
+      fileID: template.cloudFileID,
+      success: (res) => this.openDownloadedTemplate(res.tempFilePath, template),
+      fail: (error) => {
+        this.downloadCloudTemplateViaFunction(template, error);
+      },
+      complete: () => wx.hideLoading()
+    });
+  },
+
+  downloadCloudTemplateViaFunction(template, originalError) {
+    if (!wx.cloud || !wx.cloud.callFunction) {
+      wx.showToast({ title: "云端模板下载失败", icon: "none" });
+      return;
+    }
+    wx.showLoading({ title: "下载模板中" });
+    wx.cloud.callFunction({
+      name: cloudConfig.cloudFunctionName || "appStore",
+      data: {
+        action: "downloadTemplateFile",
+        fileID: template.cloudFileID
+      },
+      success: (res) => {
+        const result = res && res.result;
+        if (!result || !result.ok || !result.contentBase64) {
+          console.error("[excel-import] template function download failed", {
+            fileID: template.cloudFileID,
+            originalError,
+            result
+          });
+          wx.showToast({ title: "云端模板下载失败", icon: "none" });
+          return;
+        }
+        this.writeBase64TemplateFile(result.contentBase64, result.fileName || "progress-import-v4.xlsx", template);
+      },
+      fail: (error) => {
+        console.error("[excel-import] template function call failed", {
+          fileID: template.cloudFileID,
+          originalError,
+          error
+        });
+        wx.showToast({ title: "云端模板下载失败", icon: "none" });
+      },
+      complete: () => wx.hideLoading()
+    });
+  },
+
+  writeBase64TemplateFile(contentBase64, fileName, template = {}) {
+    if (!wx.getFileSystemManager || !wx.env || !wx.env.USER_DATA_PATH) {
+      wx.showToast({ title: "当前环境无法保存模板", icon: "none" });
+      return;
+    }
+    const filePath = `${wx.env.USER_DATA_PATH}/${fileName}`;
+    wx.getFileSystemManager().writeFile({
+      filePath,
+      data: wx.base64ToArrayBuffer ? wx.base64ToArrayBuffer(contentBase64) : contentBase64,
+      encoding: wx.base64ToArrayBuffer ? undefined : "base64",
+      success: () => this.openDownloadedTemplate(filePath, template),
+      fail: (error) => {
+        console.error("[excel-import] template write failed", { filePath, error });
+        wx.showToast({ title: "模板保存失败", icon: "none" });
+      }
+    });
+  },
+
+  downloadHttpsTemplate(template) {
+    if (!wx.downloadFile) {
+      wx.showToast({ title: "当前环境不支持下载", icon: "none" });
+      return;
+    }
+    wx.showLoading({ title: "下载模板中" });
+    wx.downloadFile({
+      url: template.httpsUrl,
+      filePath: wx.env && wx.env.USER_DATA_PATH ? `${wx.env.USER_DATA_PATH}/${template.fileName}` : undefined,
+      success: (res) => {
+        if (res.statusCode && res.statusCode !== 200) {
+          wx.showToast({ title: "模板下载失败", icon: "none" });
+          return;
+        }
+        this.openDownloadedTemplate(res.filePath || res.tempFilePath, template);
+      },
+      fail: () => wx.showToast({ title: "模板下载失败", icon: "none" }),
+      complete: () => wx.hideLoading()
+    });
+  },
+
+  openLocalDevTemplate(template) {
+    if (wx.openDocument && template.path) {
+      wx.openDocument({
+        filePath: template.path,
+        fileType: "xlsx",
+        showMenu: true,
+        fail: () => this.copyTemplatePath(template.path)
       });
       return;
     }
 
+    this.copyTemplatePath(template.path);
+  },
+
+  copyTemplatePath(path) {
+    if (wx.setClipboardData) {
+      wx.setClipboardData({
+        data: path,
+        success: () => wx.showToast({ title: "模板路径已复制", icon: "success" })
+      });
+      return;
+    }
     wx.showModal({
-      title: "Template path",
-      content: template.path,
+      title: "模板路径",
+      content: path,
       showCancel: false
     });
   },
 
   useSampleFile() {
     const file = importService.normalizeSelectedFile({
-      name: "sample_import_v3.xlsx",
+      name: "sample_import_v4.xlsx",
       path: ""
     });
     this.setData({
@@ -216,7 +351,9 @@ Page({
         errors: result.errors,
         rowIssues: this.normalizeRowIssues(result.rowIssues || []),
         detailRows: result.detailRows,
-        headerValidation: result.headerValidation
+        headerValidation: result.headerValidation,
+        projectOrderDates: this.buildProjectOrderDates(result.detailRows || []),
+        orderDateDialogVisible: false
       });
       wx.showToast({ title: "解析完成", icon: "success" });
     } catch (error) {
@@ -224,6 +361,41 @@ Page({
     } finally {
       this.setData({ isParsing: false, isBusy: false });
     }
+  },
+
+  buildProjectOrderDates(rows = []) {
+    const seen = {};
+    const today = this.getTodayString();
+    return rows
+      .filter((row) => row && row.projectNo && !row._skipImport)
+      .filter((row) => {
+        if (seen[row.projectNo]) return false;
+        seen[row.projectNo] = true;
+        return true;
+      })
+      .map((row) => ({
+        projectNo: row.projectNo,
+        projectName: row.projectName || "",
+        adminOrderDate: row.adminOrderDate || row.orderDate || today
+      }));
+  },
+
+  getTodayString() {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    return `${now.getFullYear()}-${month}-${day}`;
+  },
+
+  onProjectOrderDateChange(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const projectOrderDates = this.data.projectOrderDates.slice();
+    if (!projectOrderDates[index]) return;
+    projectOrderDates[index] = {
+      ...projectOrderDates[index],
+      adminOrderDate: e.detail.value
+    };
+    this.setData({ projectOrderDates });
   },
 
   confirmImport() {
@@ -240,30 +412,42 @@ Page({
       return;
     }
 
-    wx.showModal({
-      title: "确认导入",
-      content: `将导入 ${this.data.preview.projectCount} 个项目、${this.data.preview.deviceCount} 台设备、${this.data.preview.taskCount} 条工序任务。`,
-      confirmText: "导入",
-      success: (res) => {
-        if (res.confirm) {
-          this.setData({ isImporting: true, isBusy: true });
-          try {
-            const result = importService.confirmImport(this.data.detailRows);
-            wx.showToast({
-              title: result.ok ? `导入${result.taskCount}条任务` : "导入失败",
-              icon: result.ok ? "success" : "none"
-            });
-            if (result.ok) {
-              setTimeout(() => wx.navigateTo({ url: "/pages/import-logs/index" }), 900);
-            }
-          } catch (error) {
-            wx.showToast({ title: error.message || "导入失败", icon: "none" });
-          } finally {
-            this.setData({ isImporting: false, isBusy: false });
-          }
-        }
-      }
+    this.setData({ orderDateDialogVisible: true });
+  },
+
+  cancelOrderDateDialog() {
+    this.setData({ orderDateDialogVisible: false });
+  },
+
+  doConfirmImport() {
+    const missing = (this.data.projectOrderDates || []).find((item) => !item.adminOrderDate);
+    if (missing) {
+      wx.showToast({ title: "请填写全部项目下单时间", icon: "none" });
+      return;
+    }
+    const projectOrderDateMap = {};
+    (this.data.projectOrderDates || []).forEach((item) => {
+      projectOrderDateMap[item.projectNo] = item.adminOrderDate;
     });
+
+    this.setData({ isImporting: true, isBusy: true });
+    try {
+      const result = importService.confirmImport(this.data.detailRows, {
+        projectOrderDates: projectOrderDateMap
+      });
+      wx.showToast({
+        title: result.ok ? `导入${result.taskCount}条任务` : "导入失败",
+        icon: result.ok ? "success" : "none"
+      });
+      if (result.ok) {
+        this.setData({ orderDateDialogVisible: false });
+        setTimeout(() => wx.navigateTo({ url: "/pages/import-logs/index" }), 900);
+      }
+    } catch (error) {
+      wx.showToast({ title: error.message || "导入失败", icon: "none" });
+    } finally {
+      this.setData({ isImporting: false, isBusy: false });
+    }
   },
 
   openLogs() {

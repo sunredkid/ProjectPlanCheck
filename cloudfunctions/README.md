@@ -16,6 +16,10 @@ cloudfunctions/appStore/
 - `getStore`：读取 `appStores/production-progress-store`
 - `saveStore`：写入 `appStores/production-progress-store`
 - `health`：写入 `appStores/production-progress-health`，并读取业务快照状态 + schema 报告。
+- `login`：通过云函数上下文 openid 匹配 `users` 集合或业务快照用户，并支持按姓名/手机号自动绑定。
+- `downloadTemplateFile`：校验并下载标准进度导入模板 `templates/progress-import-v4.xlsx`。
+
+当前真实 action 固定为：`getStore / saveStore / health / login / downloadTemplateFile`。
 
 ## 部署步骤
 

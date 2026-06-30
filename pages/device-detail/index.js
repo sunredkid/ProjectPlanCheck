@@ -1,4 +1,6 @@
+const authService = require("../../services/auth-service");
 const dataService = require("../../services/data-service");
+const permissionService = require("../../services/permission-service");
 
 Page({
   data: {
@@ -9,6 +11,7 @@ Page({
     processes: [],
     qbList: [],
     params: [],
+    canSubmitDeviceProgress: true,
     isDisabling: false,
     isDeleting: false,
     isBusy: false
@@ -38,16 +41,21 @@ Page({
       return;
     }
     const project = dataService.getProject(device.projectNo);
+    const currentUser = authService.getCurrentUser() || {};
+    const canSubmitDeviceProgress = !permissionService.isDepartmentManager(currentUser) &&
+      !permissionService.canDispatchProject(currentUser);
     this.setData({
       loadError: "",
       device: { ...device, status: device.status || "启用", project: project.name },
       processes: device.processes.map((item) => ({
         ...item,
         start: item.actualStart || "-",
-        finish: item.actualFinish || "-"
+        finish: item.actualFinish || "-",
+        canSubmitProgress: canSubmitDeviceProgress && item.owner === currentUser.name
       })),
       qbList: dataService.getQbList(device.projectNo),
-      params: dataService.getParamsByDevice(device.id)
+      params: dataService.getParamsByDevice(device.id),
+      canSubmitDeviceProgress
     });
   },
 

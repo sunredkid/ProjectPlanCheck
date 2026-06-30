@@ -21,17 +21,15 @@
   gap: 12rpx;
 }
 
-button {
-  margin: 0;
-}
-
 .main-btn {
+  margin: 0;
   background: #0b7a75;
   color: #ffffff;
   border-radius: 999rpx;
 }
 
 .ghost-btn {
+  margin: 0;
   background: #e7f6f4;
   color: #0b7a75;
   border-radius: 999rpx;
@@ -48,6 +46,7 @@ button {
 
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 12rpx;
   margin: 10rpx 0 22rpx;
 }
@@ -63,6 +62,33 @@ button {
 .filter.active {
   background: #0b7a75;
   color: #ffffff;
+}
+
+.time-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  margin-bottom: 22rpx;
+}
+
+.time-label {
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.time-desc {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: #6b7280;
+}
+
+.time-value {
+  flex-shrink: 0;
+  color: #0b7a75;
+  font-size: 28rpx;
+  font-weight: 700;
 }
 
 .empty-state {
@@ -89,6 +115,13 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.project-actions-inline {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .project-no {
@@ -141,6 +174,127 @@ button {
   color: #6b7280;
   font-size: 24rpx;
   margin-bottom: 20rpx;
+}
+
+.project-status.done-status {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+
+.project-status.warning-status {
+  background: #fff7d6;
+  color: #b7791f;
+}
+
+.ship-date-line {
+  grid-column: span 2;
+}
+
+.delayed-ship-date,
+.ahead-ship-date {
+  font-weight: 700;
+}
+
+.delayed-ship-date {
+  color: #d97706;
+}
+
+.ahead-ship-date {
+  color: #dc2626;
+}
+
+.history-link {
+  margin-left: 12rpx;
+  color: #0b7a75;
+  font-weight: 700;
+}
+
+.modal-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36rpx;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.history-dialog {
+  width: 100%;
+  max-height: 72vh;
+  padding: 24rpx;
+  border-radius: 12rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 18rpx;
+}
+
+.dialog-title {
+  color: #111827;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.dialog-subtitle {
+  margin-top: 6rpx;
+  color: #6b7280;
+  font-size: 24rpx;
+}
+
+.dialog-close {
+  width: 48rpx;
+  height: 48rpx;
+  line-height: 44rpx;
+  text-align: center;
+  color: #6b7280;
+  font-size: 40rpx;
+}
+
+.history-table {
+  border: 1rpx solid #e5e7eb;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.history-row {
+  display: grid;
+  grid-template-columns: 80rpx 1fr 1fr;
+  min-height: 64rpx;
+  border-top: 1rpx solid #eef2f7;
+  color: #374151;
+  font-size: 24rpx;
+}
+
+.history-row:first-child {
+  border-top: none;
+}
+
+.history-row view {
+  display: flex;
+  align-items: center;
+  padding: 12rpx;
+  border-left: 1rpx solid #eef2f7;
+}
+
+.history-row view:first-child {
+  border-left: none;
+}
+
+.history-header {
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 700;
 }
 
 

@@ -1,9 +1,24 @@
 const dataService = require("../../services/data-service");
+const authService = require("../../services/auth-service");
+const permissionService = require("../../services/permission-service");
+
+function getTodayString() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function canEditProjectInfo(user = {}) {
+  const roleText = `${user.role || ""} ${user.roleLabel || ""}`;
+  return roleText.indexOf("进度管理员") >= 0 || roleText.indexOf("后台管理员") >= 0;
+}
 
 Page({
   data: {
     title: "新建项目",
     isEdit: false,
+    canEditProject: false,
     loadError: "",
     isSaving: false,
     statuses: ["进行中", "未开始", "已完成", "暂停"],
@@ -13,12 +28,25 @@ Page({
       name: "",
       customer: "",
       admin: "",
+      adminOrderDate: getTodayString(),
       shipDate: "2026-07-31",
       status: "进行中"
     }
   },
 
   onLoad(options = {}) {
+    const user = authService.getCurrentUser();
+    const canEditProject = permissionService.canDispatchProject(user) && canEditProjectInfo(user);
+    if (!canEditProject) {
+      this.setData({
+        canEditProject: false,
+        loadError: "只有进度管理员或后台管理员可以编辑项目计划。"
+      });
+      wx.showToast({ title: "无项目编辑权限", icon: "none" });
+      return;
+    }
+    this.setData({ canEditProject: true });
+
     const projectNo = decodeURIComponent(options.projectNo || "");
     if (!projectNo) return;
 
@@ -39,6 +67,7 @@ Page({
         name: project.name || "",
         customer: project.customer || "",
         admin: project.admin || "",
+        adminOrderDate: project.adminOrderDate || getTodayString(),
         shipDate: project.shipDate || "",
         status: project.status || "进行中"
       }
@@ -58,6 +87,10 @@ Page({
     this.setData({ "form.shipDate": e.detail.value });
   },
 
+  onAdminOrderDateChange(e) {
+    this.setData({ "form.adminOrderDate": e.detail.value });
+  },
+
   save() {
     if (this.data.isSaving) {
       return;
@@ -65,6 +98,10 @@ Page({
 
     if (this.data.loadError) {
       wx.showToast({ title: "项目信息异常", icon: "none" });
+      return;
+    }
+    if (!this.data.canEditProject) {
+      wx.showToast({ title: "无项目编辑权限", icon: "none" });
       return;
     }
 

@@ -15,12 +15,25 @@ App({
             if (!loginResult.ok && authService.isReleaseEnv()) {
               console.warn("[auth] Cloud login failed:", loginResult.message);
             }
+            this.ensureLoginBinding();
           }).catch(() => {
             // Silent fail, user stays on mock user.
+            this.ensureLoginBinding();
           });
         }
       });
     }
+  },
+
+  ensureLoginBinding() {
+    if (authService.isMockPreviewEnabled()) return;
+    const user = authService.getCurrentUser() || {};
+    if (user.phone && user.name && user.name !== "未登录") return;
+    setTimeout(() => {
+      if (typeof wx !== "undefined" && wx.reLaunch) {
+        wx.reLaunch({ url: "/pages/login/index" });
+      }
+    }, 300);
   },
 
   initBackend() {

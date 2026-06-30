@@ -1,4 +1,5 @@
 const dataService = require("../../services/data-service");
+const authService = require("../../services/auth-service");
 
 Page({
   data: {
@@ -13,6 +14,7 @@ Page({
     remarkKeyword: "",
     categoryFilter: "",
     showAdvanced: false,
+    paramTitle: "参数库",
     devices: []
   },
 
@@ -34,7 +36,10 @@ Page({
   },
 
   loadParams() {
+    const user = authService.getCurrentUser() || {};
+    const department = String(user.department || "").replace(/部$/, "");
     this.setData({
+      paramTitle: department ? `${department}参数库` : "参数库",
       devices: dataService.searchParams({
         modeKey: this.data.activeMode,
         keyword: this.data.keyword,
@@ -179,21 +184,18 @@ Page({
     };
     var templates = dataService.getDictionary ? (dataService.getDictionary("paramTemplates") || []) : [];
     templates.unshift(tpl);
-    // Use dictionary-manage to save
-    var mockData = require("../../utils/mock-data");
-    if (mockData.dictionaries) {
-      mockData.dictionaries.paramTemplates = templates;
-    }
+    var result = dataService.saveParamTemplate ? dataService.saveParamTemplate(tpl) : { ok: false };
+    if (result && result.templates) templates = result.templates;
     wx.showToast({ title: "模板已保存", icon: "none" });
     this.setData({ templates: templates });
   },
 
   deleteTemplate: function(e) {
     var tplId = e.currentTarget.dataset.id;
-    var mockData = require("../../utils/mock-data");
-    var templates = (mockData.dictionaries && mockData.dictionaries.paramTemplates) || [];
-    templates = templates.filter(function(t) { return t.id !== tplId; });
-    if (mockData.dictionaries) { mockData.dictionaries.paramTemplates = templates; }
+    var result = dataService.deleteParamTemplate ? dataService.deleteParamTemplate(tplId) : { ok: false };
+    var templates = result && result.templates ? result.templates : (
+      dataService.getDictionary ? (dataService.getDictionary("paramTemplates") || []) : []
+    );
     this.setData({ templates: templates });
     wx.showToast({ title: "模板已删除", icon: "none" });
   },

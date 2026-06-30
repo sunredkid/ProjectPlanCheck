@@ -33,8 +33,8 @@
       </view>
       <view class="field row-field" bindtap="toggleManager">
         <view>
-          <view class="field-label">是否部门管理员</view>
-          <view class="muted">开启后可进行部门内派单</view>
+          <view class="field-label">历史主管标记</view>
+          <view class="muted">兼容旧数据，不授予部门管理员权限</view>
         </view>
         <view class="switch {{form.isManager ? 'on' : ''}}">{{form.isManager ? '是' : '否'}}</view>
       </view>

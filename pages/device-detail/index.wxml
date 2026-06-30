@@ -43,11 +43,11 @@
       </view>
       <view class="detail-grid">
         <view>负责人：{{item.owner}}</view>
-        <view>计划截止：{{item.due}}</view>
+        <view>计划完成：{{item.due}}</view>
         <view>实际开始：{{item.start}}</view>
-        <view>实际完成：{{item.finish}}</view>
+        <view>实际完成：<text class="{{item.actualFinishTone}}">{{item.finish}}</text></view>
       </view>
-      <button wx:if="{{item.owner !== '-'}}" size="mini" class="main-btn" data-process="{{item.name}}" bindtap="submitProgress">提交进度</button>
+      <button wx:if="{{item.canSubmitProgress}}" size="mini" class="main-btn" data-process="{{item.name}}" bindtap="submitProgress">提交进度</button>
     </view>
   </block>
 
