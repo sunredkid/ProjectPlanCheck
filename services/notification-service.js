@@ -244,32 +244,11 @@ function requestSubscribeMessage(callback) {
   });
 }
 
-// Send a template message via cloud function.
-// In mock mode, this is a no-op that logs to console.
-// In cloud mode, calls wx.cloud.callFunction({ name: "appStore", data: { action: "sendTemplateMsg", ... } })
+// Template-message sending is not enabled in the current appStore cloud function.
+// Keep this compatibility entry as a no-op until a dedicated cloud action is added.
 function sendTemplateMessage(opts) {
   if (!opts || !opts.tmplId || !opts.touser) return Promise.resolve({ ok: false, message: "Missing required params." });
-
-  // Mock mode: just log
-  if (typeof wx === "undefined" || !wx.cloud || !wx.cloud.callFunction) {
-    return Promise.resolve({ ok: true, mode: "mock", message: "Template message logged (mock)." });
-  }
-
-  return wx.cloud.callFunction({
-    name: "appStore",
-    data: {
-      action: "sendTemplateMsg",
-      touser: opts.touser,
-      templateId: opts.tmplId,
-      page: opts.page || "",
-      data: opts.data || {},
-      emphasisKeyword: opts.emphasisKeyword || ""
-    }
-  }).then(function(res) {
-    return { ok: true, mode: "cloud", result: res };
-  }).catch(function(err) {
-    return { ok: false, mode: "cloud-error", message: err.errMsg || err.message || "Failed to send template message." };
-  });
+  return Promise.resolve({ ok: false, mode: "disabled", message: "Template message cloud action is not enabled." });
 }
 
 // Convenience: send task assignment template message

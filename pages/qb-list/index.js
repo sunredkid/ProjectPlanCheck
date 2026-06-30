@@ -14,11 +14,30 @@ Page({
     activeProjectNo: "",
     activeOwner: "",
     qbList: [],
+    timelineGroups: [],
     total: 0,
     pageNo: 1,
     pageSize: 8,
     hasMore: false,
     isLoading: false
+  },
+
+  buildTimelineGroups(items = []) {
+    const groups = [];
+    const map = {};
+    items.forEach((item) => {
+      const key = item.projectOrderLabel || "未记录下单时间";
+      if (!map[key]) {
+        map[key] = {
+          key,
+          label: key,
+          items: []
+        };
+        groups.push(map[key]);
+      }
+      map[key].items.push(item);
+    });
+    return groups;
   },
 
   onLoad() {
@@ -82,8 +101,10 @@ Page({
         pageSize: this.data.pageSize
       });
       const items = result.items || [];
+      const qbList = reset ? items : this.data.qbList.concat(items);
       this.setData({
-        qbList: reset ? items : this.data.qbList.concat(items),
+        qbList,
+        timelineGroups: this.buildTimelineGroups(qbList),
         total: result.total || 0,
         pageNo: (result.pageNo || pageNo) + 1,
         hasMore: !!result.hasMore

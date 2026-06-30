@@ -12,7 +12,30 @@
     >{{item.label}}</view>
   </view>
 
-  <view class="card">
+  <view wx:if="{{activeDict === 'paramLibraries'}}" class="card">
+    <view wx:for="{{paramLibraries}}" wx:key="key" class="library-card">
+      <view class="library-head">
+        <view>
+          <view class="dict-text">{{item.name}}</view>
+          <view class="muted">标识符：{{item.key}}｜数据源：{{item.sourceKey}}</view>
+        </view>
+        <button size="mini" class="main-btn" data-key="{{item.key}}" bindtap="saveParamLibraryAccess">保存</button>
+      </view>
+      <view class="department-grid">
+        <view
+          wx:for="{{item.departmentOptions}}"
+          wx:for-item="department"
+          wx:key="name"
+          class="department-chip {{department.selected ? 'active' : ''}}"
+          data-key="{{item.key}}"
+          data-department="{{department.name}}"
+          bindtap="toggleParamDepartment"
+        >{{department.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="card">
     <view wx:for="{{items}}" wx:key="index" class="dict-row">
       <view wx:if="{{editingIndex === index}}">
         <input class="edit-input" value="{{editValue}}" bindinput="onEditInput" focus="{{true}}" />

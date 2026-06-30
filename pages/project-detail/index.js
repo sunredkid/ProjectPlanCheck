@@ -3,10 +3,22 @@ const attachmentService = require("../../services/attachment-service");
 const dataService = require("../../services/data-service");
 const permissionService = require("../../services/permission-service");
 
+function canEditProjectInfo(user = {}) {
+  const roleText = `${user.role || ""} ${user.roleLabel || ""}`;
+  return roleText.indexOf("进度管理员") >= 0 || roleText.indexOf("后台管理员") >= 0;
+}
+
 Page({
   data: {
     currentUser: {},
     canCreateQb: false,
+    canEditProject: false,
+    canDispatchProject: false,
+    canDispatchDepartment: false,
+    departmentSubmitOptions: [],
+    canDepartmentSubmitProject: false,
+    departmentSubmitProcess: "",
+    departmentSubmitDepartment: "",
     activeTab: "设备进度",
     tabs: ["设备进度", "QB异常", "附件"],
     project: {},
@@ -19,6 +31,8 @@ Page({
     isUploadingAtt: false,
     uploadProgress: 0,
     uploadTotal: 0,
+    shipDateHistoryVisible: false,
+    shipDateHistoryRecords: [],
     cloudUploadEnabled: false
   },
 
@@ -41,6 +55,7 @@ Page({
   },
 
   loadProject(projectNo) {
+    const currentUser = authService.getCurrentUser() || {};
     const project = dataService.getProject(projectNo);
     if (!project || project.projectNo !== projectNo) {
       this.setData({
@@ -51,7 +66,31 @@ Page({
       });
       return;
     }
-    const devices = dataService.getDevicesByProject(projectNo);
+    const expandedDevices = this.data.expandedDevices || {};
+    const departmentSubmitOptions = dataService.getDepartmentProjectSubmitOptions(projectNo, currentUser);
+    const assignTasks = dataService.filterTasksByView("assign", currentUser) || [];
+    const devices = dataService.getDevicesByProject(projectNo).map((device) => {
+      const processes = (device.processes && device.processes.length ? device.processes : dataService.getProcessesByDevice(device.id))
+        .map((process) => {
+          const rowTask = assignTasks.find((task) => {
+            const taskDevice = String(task.device || "");
+            return (task.projectNo === projectNo || String(task.project || "").indexOf(projectNo) >= 0) &&
+              (task.deviceId === device.id || taskDevice.indexOf(device.deviceNo || "") >= 0 || taskDevice === device.deviceNo) &&
+              task.process === process.name &&
+              task.department === process.department;
+          });
+          return {
+            ...process,
+            dispatchRowKey: rowTask ? rowTask.rowKey : "",
+            canDepartmentDispatch: !!rowTask && process.department === currentUser.department
+          };
+        });
+      return {
+        ...device,
+        processes,
+        expanded: !!expandedDevices[device.id]
+      };
+    });
     this.setData({
       loadError: "",
       project: {
@@ -61,15 +100,23 @@ Page({
         delayedCount: project.delayed,
       },
       devices,
+      departmentSubmitOptions,
+      canDepartmentSubmitProject: departmentSubmitOptions.length > 0,
+      departmentSubmitProcess: departmentSubmitOptions[0] ? departmentSubmitOptions[0].process : "",
+      departmentSubmitDepartment: departmentSubmitOptions[0] ? departmentSubmitOptions[0].department : "",
       qbList: dataService.listQb({ projectNo })
     });
   },
 
   onShow() {
     const user = authService.getCurrentUser();
+    const canProjectLevelManage = permissionService.canDispatchProject(user) && canEditProjectInfo(user);
     this.setData({
       currentUser: user,
-      canCreateQb: permissionService.canCreateQb(user)
+      canCreateQb: false,
+      canEditProject: canProjectLevelManage,
+      canDispatchProject: canProjectLevelManage,
+      canDispatchDepartment: permissionService.canDispatchDepartment(user)
     });
     if (this.data.projectNo) {
       this.loadProject(this.data.projectNo);
@@ -80,6 +127,27 @@ Page({
   switchTab(e) {
     this.setData({ activeTab: e.currentTarget.dataset.value });
   },
+
+  showShipDateHistory() {
+    const records = (this.data.project && this.data.project.shipDateHistory) || [];
+    if (!records.length) return;
+    this.setData({
+      shipDateHistoryVisible: true,
+      shipDateHistoryRecords: records.map((item, index) => ({
+        ...item,
+        index: index + 1
+      }))
+    });
+  },
+
+  hideShipDateHistory() {
+    this.setData({
+      shipDateHistoryVisible: false,
+      shipDateHistoryRecords: []
+    });
+  },
+
+  noop() {},
 
   openDevice(e) {
     const id = e.currentTarget.dataset.id;
@@ -95,12 +163,51 @@ Page({
   toggleDeviceProcesses(e) {
     const id = e.currentTarget.dataset.id;
     if (!id) return;
+    const expanded = !this.data.expandedDevices[id];
     this.setData({
-      ["expandedDevices." + id]: !this.data.expandedDevices[id]
+      ["expandedDevices." + id]: expanded,
+      devices: (this.data.devices || []).map((device) => (
+        device.id === id ? { ...device, expanded } : device
+      ))
+    });
+  },
+
+  openDepartmentDispatch(e) {
+    const rowKey = e.currentTarget.dataset.rowKey || "";
+    if (!this.data.canDispatchDepartment) {
+      wx.showToast({ title: "只有部门管理员可以设备派单", icon: "none" });
+      return;
+    }
+    if (!rowKey) {
+      wx.showToast({ title: "未找到待分配任务", icon: "none" });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/department-dispatch/index?rowKey=${encodeURIComponent(rowKey)}`
+    });
+  },
+
+  openProjectDepartmentProgress(e) {
+    const process = e.currentTarget.dataset.process || "";
+    const department = e.currentTarget.dataset.department || "";
+    if (!this.data.canDispatchDepartment) {
+      wx.showToast({ title: "只有部门管理员可以提交项目进度", icon: "none" });
+      return;
+    }
+    if (!this.data.project.projectNo || !process || !department) {
+      wx.showToast({ title: "项目信息缺失", icon: "none" });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/progress-submit/index?projectNo=${encodeURIComponent(this.data.project.projectNo)}&process=${encodeURIComponent(process)}&department=${encodeURIComponent(department)}`
     });
   },
 
   addDevice() {
+    if (!this.data.canEditProject) {
+      wx.showToast({ title: "无设备新增权限", icon: "none" });
+      return;
+    }
     if (!this.data.project.projectNo) {
       wx.showToast({ title: "项目编号缺失", icon: "none" });
       return;
@@ -111,6 +218,10 @@ Page({
   },
 
   editProject() {
+    if (!this.data.canEditProject) {
+      wx.showToast({ title: "无项目编辑权限", icon: "none" });
+      return;
+    }
     if (!this.data.project.projectNo) {
       wx.showToast({ title: "项目编号缺失", icon: "none" });
       return;
@@ -121,6 +232,10 @@ Page({
   },
 
   openDispatch() {
+    if (!this.data.canDispatchProject) {
+      wx.showToast({ title: "只有进度管理员可以派单到部门", icon: "none" });
+      return;
+    }
     if (!this.data.project.projectNo) {
       wx.showToast({ title: "项目编号缺失", icon: "none" });
       return;
@@ -130,30 +245,11 @@ Page({
     });
   },
 
-  archiveProject() {
-    wx.showModal({
-      title: "归档项目",
-      content: "归档后项目将从默认列表隐藏，可在已归档筛选中查看。",
-      confirmText: "归档",
-      success: (res) => {
-        if (!res.confirm) return;
-        if (!this.data.project.projectNo) {
-          wx.showToast({ title: "项目编号缺失", icon: "none" });
-          return;
-        }
-        const result = dataService.archiveProject(this.data.project.projectNo);
-        wx.showToast({
-          title: result.ok ? "已归档" : result.message,
-          icon: result.ok ? "success" : "none"
-        });
-        if (result.ok) {
-          setTimeout(() => wx.navigateBack(), 700);
-        }
-      }
-    });
-  },
-
   deleteProject() {
+    if (!this.data.canEditProject) {
+      wx.showToast({ title: "无项目删除权限", icon: "none" });
+      return;
+    }
     wx.showModal({
       title: "删除项目",
       content: "删除会移除项目、设备、工序、参数、派单、任务和QB记录。此操作仅影响当前运行时 mock 数据。",
@@ -178,13 +274,7 @@ Page({
   },
 
   addQb() {
-    if (!this.data.project.projectNo) {
-      wx.showToast({ title: "项目编号缺失", icon: "none" });
-      return;
-    }
-    wx.navigateTo({
-      url: "/pages/qb-create/index?projectNo=" + encodeURIComponent(this.data.project.projectNo)
-    });
+    wx.showToast({ title: dataService.getQbIntegrationInfo().message, icon: "none" });
   },
 
   openQb(e) {

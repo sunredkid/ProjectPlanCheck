@@ -8,7 +8,6 @@
     "pages/progress-submit/index",
     "pages/qb-create/index",
     "pages/qb-detail/index",
-    "pages/qb-transfer/index",
     "pages/qb-list/index",
     "pages/param-detail/index",
     "pages/param-compare/index",
@@ -29,7 +28,8 @@
     "pages/permission-manage/index",
     "pages/dictionary-manage/index",
     "pages/dashboard/index",
-    "pages/notifications/index"
+    "pages/notifications/index",
+    "pages/login/index"
   ],
   "window": {
     "navigationBarTextStyle": "white",

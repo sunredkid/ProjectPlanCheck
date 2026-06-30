@@ -1,5 +1,6 @@
 const authService = require("../../services/auth-service");
 const dataService = require("../../services/data-service");
+const permissionService = require("../../services/permission-service");
 
 const PAGE_SIZE = 15;
 
@@ -39,16 +40,11 @@ Page({
     viewMode: "list",
     kanbanColumns: [],
     draggingTask: null,
-    dragOverColumn: ""
+    dragOverColumn: "",
+    currentUser: {},
+    isDepartmentManager: false
   },
 
-
-  switchViewMode: function() {
-    var mode = this.data.viewMode === "list" ? "kanban" : "list";
-    this.setData({ viewMode: mode }, function() {
-      if (mode === "kanban") this.buildKanban();
-    }.bind(this));
-  },
   onLoad() {
     this.cloudUnsubscribe = dataService.onCloudStoreChange(() => {
       this.loadTasks();
@@ -56,6 +52,11 @@ Page({
   },
 
   onShow() {
+    const currentUser = authService.getCurrentUser() || {};
+    this.setData({
+      currentUser,
+      isDepartmentManager: permissionService.isDepartmentManager(currentUser)
+    });
     this.loadTasks();
   },
 
@@ -66,78 +67,74 @@ Page({
     }
   },
 
-
-  // ---- Kanban view ----
-
-  buildKanban: function() {
-    var tasks = this.getAllFilteredTasks().filter(function(t) { return !isDoneTask(t); });
-    // Column definitions: use status values as columns
-    var colKeys = ["待处理", "进行中", "延期", "待分配", "QB待处理"];
-    var columns = colKeys.map(function(key) {
-      return {
-        key: key,
-        label: key,
-        tasks: tasks.filter(function(t) {
-          var s = String(t.status || "");
-          if (key === "待处理") return s === "待处理" || s.indexOf("待处理") >= 0;
-          if (key === "进行中") return s === "进行中" || s.indexOf("进行") >= 0 || s.indexOf("处理中") >= 0;
-          if (key === "延期") return s === "延期" || s.indexOf("延期") >= 0 || s.indexOf("逾期") >= 0;
-          if (key === "待分配") return t.kind === "assign";
-          if (key === "QB待处理") return t.kind === "qb";
-          return false;
-        })
-      };
+  switchViewMode() {
+    const mode = this.data.viewMode === "list" ? "kanban" : "list";
+    this.setData({ viewMode: mode }, () => {
+      if (mode === "kanban") this.buildKanban();
     });
+  },
+
+  buildKanban() {
+    const tasks = this.getAllFilteredTasks().filter((task) => !isDoneTask(task));
+    const columns = [
+      { key: "待处理", label: "待处理" },
+      { key: "进行中", label: "进行中" },
+      { key: "延期", label: "延期" },
+      { key: "待分配", label: "待分配" },
+      { key: "QB待处理", label: "QB待处理" }
+    ].map((col) => ({
+      ...col,
+      tasks: tasks.filter((task) => {
+        const status = String(task.status || "");
+        if (col.key === "待处理") return status === "待处理" || status.indexOf("待处理") >= 0;
+        if (col.key === "进行中") return status === "进行中" || status.indexOf("进行") >= 0 || status.indexOf("处理") >= 0;
+        if (col.key === "延期") return status === "延期" || status.indexOf("延期") >= 0 || status.indexOf("逾期") >= 0;
+        if (col.key === "待分配") return task.kind === "assign" || status.indexOf("待部门派单") >= 0;
+        if (col.key === "QB待处理") return task.kind === "qb";
+        return false;
+      })
+    }));
     this.setData({ kanbanColumns: columns });
   },
 
-  onTaskTouchStart: function(e) {
-    var rowKey = e.currentTarget.dataset.rowKey;
-    this._dragTask = { rowKey: rowKey, startX: e.touches[0].pageX, startY: e.touches[0].pageY };
+  onTaskTouchStart(e) {
+    const rowKey = e.currentTarget.dataset.rowKey;
+    this._dragTask = { rowKey, startX: e.touches[0].pageX, startY: e.touches[0].pageY };
   },
 
-  onTaskTouchMove: function(e) {
+  onTaskTouchMove(e) {
     if (!this._dragTask) return;
-    var dx = e.touches[0].pageX - this._dragTask.startX;
-    var dy = e.touches[0].pageY - this._dragTask.startY;
-    // Only activate drag after 10px movement
+    const dx = e.touches[0].pageX - this._dragTask.startX;
+    const dy = e.touches[0].pageY - this._dragTask.startY;
     if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
     this.setData({ draggingTask: this._dragTask.rowKey });
   },
 
-  onDragOverColumn: function(e) {
-    var colKey = e.currentTarget.dataset.column;
+  onDragOverColumn(e) {
+    const colKey = e.currentTarget.dataset.column;
     if (colKey !== this.data.dragOverColumn) {
       this.setData({ dragOverColumn: colKey });
     }
   },
 
-  onDropTask: function() {
-    if (!this.data.draggingTask || !this.data.dragOverColumn) {
+  onDropTask(e) {
+    const targetStatus = this.data.dragOverColumn || (e && e.currentTarget && e.currentTarget.dataset.column) || "";
+    if (!this.data.draggingTask || !targetStatus) {
       this.setData({ draggingTask: null, dragOverColumn: "" });
+      this._dragTask = null;
       return;
     }
-    var rowKey = this.data.draggingTask;
-    var targetStatus = this.data.dragOverColumn;
-
-    // Map column key back to actual status value
-    var statusMap = { "待分配": "待分配", "QB待处理": "QB待处理" };
-    var newStatus = statusMap[targetStatus] || targetStatus;
-
-    // Update the task status in mock data via dataService
-    var task = dataService.getTaskByRowKey(rowKey);
-    if (!task) {
-      this.setData({ draggingTask: null, dragOverColumn: "" });
-      return;
-    }
-    task.status = newStatus;
-    if (newStatus === "待分配") { task.owner = ""; task.kind = "assign"; }
-    if (newStatus === "QB待处理") { task.kind = "qb"; }
-
+    const result = dataService.updateTaskStatusByRowKey(this.data.draggingTask, targetStatus);
     this.setData({ draggingTask: null, dragOverColumn: "" });
-    this.buildKanban();
-    wx.showToast({ title: "已移至 " + targetStatus, icon: "none" });
+    this._dragTask = null;
+    if (!result || !result.ok) {
+      wx.showToast({ title: (result && result.message) || "移动失败", icon: "none" });
+      return;
+    }
+    this.loadTasks();
+    wx.showToast({ title: "已移至" + targetStatus, icon: "none" });
   },
+
   onReachBottom() {
     if (this.data.hasMore && !this.data.loadingMore) {
       this.loadMoreTasks();
@@ -219,9 +216,9 @@ Page({
       this.setData({ hasMore: false });
       return;
     }
-    this.setData({ loadingMore: true });
     this.setData({
-      tasks: [...this.data.tasks, ...nextSlice],
+      loadingMore: true,
+      tasks: this.data.tasks.concat(nextSlice),
       pageNo,
       hasMore: start + PAGE_SIZE < all.length,
       loadingMore: false
@@ -274,6 +271,18 @@ Page({
     const rowKey = e.currentTarget.dataset.rowKey || "";
     if (!rowKey) {
       wx.showToast({ title: "任务标识缺失", icon: "none" });
+      return;
+    }
+    const task = dataService.getTaskByRowKey(rowKey);
+    if (this.data.isDepartmentManager && task) {
+      if (task.department !== this.data.currentUser.department) {
+        wx.showToast({ title: "只能提交本部门项目进度", icon: "none" });
+        return;
+      }
+      const projectNo = task.projectNo || String(task.project || "").split(/\s+/)[0];
+      wx.navigateTo({
+        url: `/pages/progress-submit/index?projectNo=${encodeURIComponent(projectNo)}&process=${encodeURIComponent(task.process)}&department=${encodeURIComponent(task.department)}`
+      });
       return;
     }
     wx.navigateTo({

@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "部门派单",
+  "navigationBarTitleText": "设备派单",
   "usingComponents": {
     "bottom-nav": "/components/bottom-nav/index"
   }

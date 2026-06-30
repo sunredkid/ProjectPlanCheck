@@ -1,26 +1,38 @@
 const dataService = require("../../services/data-service");
 const attachmentService = require("../../services/attachment-service");
+const authService = require("../../services/auth-service");
+
+function getTodayString() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
 
 Page({
   data: {
     task: {},
     taskRowKey: "",
     deviceId: "",
+    projectNo: "",
+    department: "",
     processName: "",
+    submitMode: "device",
     loadError: "",
     statusOptions: ["未开始", "进行中", "已完成", "有风险", "暂停"],
     status: "已完成",
-    actualStartDate: "2026-06-25",
-    actualFinishDate: "2026-06-25",
-    actualStartDateText: "2026-06-25",
-    actualFinishDateText: "2026-06-25",
+    statusLocked: true,
+    actualStartDate: getTodayString(),
+    actualFinishDate: getTodayString(),
+    actualStartDateText: getTodayString(),
+    actualFinishDateText: getTodayString(),
     quantity: "1",
     remark: "",
     attachments: [],
     isSubmitting: false,
     isUploadingAtt: false,
     uploadProgress: 0,
-    uploadTotal: 0
+    uploadTotal: 0,
+    unfinishedDialogVisible: false,
+    unfinishedRows: []
   },
 
   updateDateText(update = {}) {
@@ -38,6 +50,40 @@ Page({
   },
 
   onLoad(options = {}) {
+    const projectNo = decodeURIComponent(options.projectNo || "");
+    const projectProcess = decodeURIComponent(options.process || "");
+    const department = decodeURIComponent(options.department || "");
+    if (projectNo && projectProcess && department) {
+      const project = dataService.getProject(projectNo);
+      if (!project || project.projectNo !== projectNo) {
+        this.setData({ loadError: "项目不存在，请从项目详情重新进入。" });
+        wx.showToast({ title: "项目不存在", icon: "none" });
+        return;
+      }
+      const dispatchStartDate = dataService.getProjectDepartmentDispatchDate
+        ? dataService.getProjectDepartmentDispatchDate({ projectNo, process: projectProcess, department })
+        : "";
+      this.setData(this.updateDateText({
+        loadError: "",
+        submitMode: "project",
+        projectNo,
+        department,
+        processName: projectProcess,
+        task: {
+          project: `${project.projectNo} ${project.name || ""}`.trim(),
+          device: "项目下全部对应设备",
+          process: projectProcess,
+          owner: department,
+          plannedDueDate: ""
+        },
+        status: "已完成",
+        statusLocked: true,
+        actualStartDate: dispatchStartDate,
+        actualFinishDate: getTodayString()
+      }));
+      return;
+    }
+
     const rowKey = decodeURIComponent(options.rowKey || "");
     if (rowKey) {
       const task = dataService.getTaskByRowKey(rowKey);
@@ -46,6 +92,14 @@ Page({
         wx.showToast({ title: "任务不存在", icon: "none" });
         return;
       }
+      const assignmentStartDate = dataService.getDeviceProcessAssignmentDate
+        ? dataService.getDeviceProcessAssignmentDate({
+            taskRowKey: rowKey,
+            deviceId: task.deviceId || "",
+            process: task.process || "",
+            task
+          })
+        : "";
 
       this.setData(this.updateDateText({
         loadError: "",
@@ -53,8 +107,9 @@ Page({
         taskRowKey: rowKey,
         deviceId: task.deviceId || "",
         processName: task.process || "",
-        status: task.status === "待部门派单" ? "进行中" : (task.status || this.data.status),
-        actualStartDate: task.actualStart || this.data.actualStartDate,
+        status: "已完成",
+        statusLocked: true,
+        actualStartDate: assignmentStartDate || task.actualStart || this.data.actualStartDate,
         actualFinishDate: task.actualFinish || this.data.actualFinishDate,
         quantity: task.quantity || this.data.quantity,
         remark: task.remark || ""
@@ -74,6 +129,13 @@ Page({
       return;
     }
     const project = dataService.getProject(device.projectNo);
+    const assignmentStartDate = dataService.getDeviceProcessAssignmentDate
+      ? dataService.getDeviceProcessAssignmentDate({
+          deviceId,
+          process: process.name,
+          owner: process.owner
+        })
+      : "";
     this.setData(this.updateDateText({
       loadError: "",
       task: {
@@ -87,19 +149,21 @@ Page({
       deviceId,
       processName,
       status: process.status || this.data.status,
-      actualStartDate: process.actualStart || this.data.actualStartDate,
+      statusLocked: true,
+      actualStartDate: assignmentStartDate || process.actualStart || this.data.actualStartDate,
       actualFinishDate: process.actualFinish || this.data.actualFinishDate
     }));
   },
 
   chooseStatus(e) {
+    if (this.data.statusLocked) return;
     const status = e.currentTarget.dataset.value;
     const update = { status };
     if (status === "已完成" && !this.data.actualFinishDate) {
-      update.actualFinishDate = "2026-06-25";
+      update.actualFinishDate = getTodayString();
     }
     if (status === "进行中" && !this.data.actualStartDate) {
-      update.actualStartDate = "2026-06-25";
+      update.actualStartDate = getTodayString();
     }
     this.setData(this.updateDateText(update));
   },
@@ -168,12 +232,19 @@ Page({
     });
   },
 
+  acknowledgeUnfinishedDialog() {
+    this.setData({ unfinishedDialogVisible: false });
+    wx.navigateBack();
+  },
+
   submit() {
     if (this.data.isSubmitting) {
       return;
     }
 
-    if (this.data.loadError || (!this.data.taskRowKey && (!this.data.deviceId || !this.data.processName))) {
+    if (this.data.loadError || (this.data.submitMode === "project"
+      ? (!this.data.projectNo || !this.data.processName || !this.data.department)
+      : (!this.data.taskRowKey && (!this.data.deviceId || !this.data.processName)))) {
       wx.showToast({ title: "任务信息缺失", icon: "none" });
       return;
     }
@@ -185,23 +256,53 @@ Page({
       return;
     }
 
+    if (this.data.submitMode === "project") {
+      const preview = dataService.getProjectDepartmentProgressPreview({
+        currentUser: authService.getCurrentUser(),
+        projectNo: this.data.projectNo,
+        department: this.data.department,
+        process: this.data.processName
+      });
+      if (!preview.ok) {
+        wx.showToast({ title: preview.message || "无法预览项目进度", icon: "none" });
+        return;
+      }
+      if ((preview.unfinished || []).length) {
+        this.setData({
+          unfinishedRows: preview.unfinished,
+          unfinishedDialogVisible: true
+        });
+        return;
+      }
+    }
+
     this.setData({ isSubmitting: true });
     try {
-      const result = dataService.submitProgress({
-        taskRowKey: this.data.taskRowKey,
-        deviceId: this.data.deviceId,
+      const payload = {
+        currentUser: authService.getCurrentUser(),
         process: this.data.processName,
-        task: this.data.task,
-        status: this.data.status,
+        status: "已完成",
         actualStartDate: this.data.actualStartDate,
         actualFinishDate: this.data.actualFinishDate,
         quantity: this.data.quantity,
         remark: this.data.remark,
         attachments: this.data.attachments
-      });
+      };
+      const result = this.data.submitMode === "project"
+        ? dataService.submitProjectDepartmentProgress({
+            ...payload,
+            projectNo: this.data.projectNo,
+            department: this.data.department
+          })
+        : dataService.submitProgress({
+            ...payload,
+            taskRowKey: this.data.taskRowKey,
+            deviceId: this.data.deviceId,
+            task: this.data.task
+          });
 
       wx.showToast({
-        title: result.ok ? "进度已提交" : result.message || "提交失败",
+        title: result.ok ? (this.data.submitMode === "project" ? "项目进度已提交" : "进度已完成") : result.message || "提交失败",
         icon: result.ok ? "success" : "none"
       });
 

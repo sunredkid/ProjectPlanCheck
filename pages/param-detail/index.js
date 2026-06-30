@@ -48,18 +48,27 @@ Page({
 
   onShow() {
     const user = authService.getCurrentUser();
+    const params = this.data.device.id ? dataService.getParamsByDevice(this.data.device.id) : this.data.params;
+    const categoryOrder = dataService.getParamCategoryOrder();
     this.setData({
       currentUser: user,
-      canEdit: permissionService.canEditParams(user)
+      canEdit: permissionService.canEditParams(user),
+      params,
+      categoryOrder
     });
     this.buildGroups();
   },
 
   buildGroups() {
     const params = this.data.params.slice().sort((a, b) => a.sort - b.sort);
-    const groupedParams = this.data.categoryOrder
+    const categoryOrder = this.data.categoryOrder.slice();
+    params.forEach((param) => {
+      const category = param.category || "未分类";
+      if (categoryOrder.indexOf(category) < 0) categoryOrder.push(category);
+    });
+    const groupedParams = categoryOrder
       .map((category) => {
-        const items = params.filter((item) => item.category === category);
+        const items = params.filter((item) => (item.category || "未分类") === category);
         return {
           category,
           count: items.length,

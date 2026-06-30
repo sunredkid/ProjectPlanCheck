@@ -1,4 +1,6 @@
+const authService = require("../../services/auth-service");
 const dataService = require("../../services/data-service");
+const permissionService = require("../../services/permission-service");
 
 Page({
   data: {
@@ -22,6 +24,12 @@ Page({
   },
 
   onLoad(options) {
+    const user = authService.getCurrentUser();
+    if (!permissionService.canDispatchProject(user)) {
+      this.setData({ loadError: "只有进度管理员可以派单到部门。" });
+      wx.showToast({ title: "无项目派单权限", icon: "none" });
+      return;
+    }
     if (!options.projectNo) {
       this.setData({ loadError: "缺少项目编号，请从项目详情重新进入。" });
       wx.showToast({ title: "缺少项目编号", icon: "none" });

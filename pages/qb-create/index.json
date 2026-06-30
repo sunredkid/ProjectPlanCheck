@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "新增QB",
+  "navigationBarTitleText": "QB只读",
   "usingComponents": {
     "bottom-nav": "/components/bottom-nav/index"
   }

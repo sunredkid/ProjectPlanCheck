@@ -1,24 +1,38 @@
 ﻿const users = [
   { id: "u1", name: "秦朗", phone: "18352439458", department: "电气设计部", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
-  { id: "u2", name: "李洋", phone: "138****0101", department: "采购部", role: "普通员工", roleLabel: "采购部员工", isManager: false, status: "启用" },
+  { id: "u2", name: "李洋", phone: "138****0101", department: "品质部", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
   { id: "u3", name: "张绍方", phone: "138****0201", department: "制造部", role: "进度管理员", roleLabel: "进度管理员", isManager: true, status: "启用" },
   { id: "u4", name: "总经理", phone: "138****0301", department: "总经办/销售/市场", role: "观察员", roleLabel: "观察员", isManager: false, status: "启用" },
   { id: "u5", name: "IT", phone: "138****0000", department: "信息化", role: "后台管理员", roleLabel: "后台管理员", isManager: true, status: "启用" },
-  { id: "u6", name: "陈七", phone: "138****0401", department: "结构设计部", role: "部门管理员", roleLabel: "部门管理员", isManager: true, status: "启用" },
-  { id: "u7", name: "周八", phone: "138****0501", department: "仓库部", role: "部门管理员", roleLabel: "部门管理员", isManager: true, status: "启用" }
+  { id: "u6", name: "彭博", phone: "138****0401", department: "结构设计部", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u7", name: "郭敬锋", phone: "138****0501", department: "仓库部", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u8", name: "吴洁", phone: "138****0601", department: "综管部", role: "综管部管理员", roleLabel: "综管部管理员", isManager: true, status: "启用" },
+  { id: "u9", name: "刘爽", phone: "138****0701", department: "工艺部门", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u10", name: "蒋相波", phone: "138****0801", department: "项目部", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u11", name: "卢建平", phone: "138****0901", department: "电气电控车间", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u12", name: "郑雪莲", phone: "138****1001", department: "采购部", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u13", name: "孙志勇", phone: "138****1301", department: "生产装配", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u14", name: "朱建闯", phone: "138****1401", department: "生产装配", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u15", name: "王国峰", phone: "138****1501", department: "壁板车间", role: "普通员工", roleLabel: "普通员工", isManager: false, status: "启用" },
+  { id: "u16", name: "陈尚杰", phone: "138****1601", department: "电气设计部", role: "部门管理员", roleLabel: "部门管理员", isManager: true, status: "启用" },
+  { id: "u17", name: "苏高森", phone: "138****1701", department: "总经办/销售/市场", role: "观察员", roleLabel: "观察员", isManager: false, status: "启用" }
 ];
 
 const departments = [
-  { id: "d1", name: "项目部", managers: "张绍方", status: "启用", sort: 1 },
-  { id: "d2", name: "电气设计部", managers: "秦朗", status: "启用", sort: 2 },
-  { id: "d3", name: "结构设计部", managers: "陈七", status: "启用", sort: 3 },
-  { id: "d4", name: "电工房", managers: "", status: "启用", sort: 4 },
-  { id: "d5", name: "结构班组", managers: "", status: "启用", sort: 5 },
-  { id: "d6", name: "电气班组", managers: "", status: "启用", sort: 6 },
-  { id: "d7", name: "采购部", managers: "李洋", status: "启用", sort: 7 },
-  { id: "d8", name: "仓库部", managers: "周八", status: "启用", sort: 8 },
-  { id: "d9", name: "品质部", managers: "", status: "启用", sort: 9 },
-  { id: "d10", name: "生产部", managers: "", status: "启用", sort: 10 }
+  { id: "d1", name: "项目部", managers: "蒋相波", status: "启用", sort: 1 },
+  { id: "d2", name: "电气设计部", managers: "陈尚杰", status: "启用", sort: 2 },
+  { id: "d3", name: "结构设计部", managers: "", status: "启用", sort: 3 },
+  { id: "d4", name: "工艺部门", managers: "刘爽", status: "启用", sort: 4 },
+  { id: "d5", name: "采购部", managers: "郑雪莲", status: "启用", sort: 5 },
+  { id: "d6", name: "电气电控车间", managers: "卢建平", status: "启用", sort: 6 },
+  { id: "d7", name: "生产装配", managers: "孙志勇、朱建闯", status: "启用", sort: 7 },
+  { id: "d8", name: "壁板车间", managers: "王国峰", status: "启用", sort: 8 },
+  { id: "d9", name: "品质部", managers: "李洋", status: "启用", sort: 9 },
+  { id: "d10", name: "仓库部", managers: "郭敬锋", status: "启用", sort: 10 },
+  { id: "d11", name: "总经办/销售/市场", managers: "总经理、苏高森", status: "启用", sort: 11 },
+  { id: "d12", name: "制造部", managers: "张绍方", status: "启用", sort: 12 },
+  { id: "d13", name: "信息化", managers: "IT", status: "启用", sort: 13 },
+  { id: "d14", name: "综管部", managers: "吴洁", status: "启用", sort: 14 }
 ];
 
 const projects = [
@@ -28,6 +42,10 @@ const projects = [
     name: "中创新航藤洲",
     customer: "中创新航",
     admin: "张绍方",
+    adminOrderDate: "2026-06-18",
+    adminOrderYear: "2026",
+    adminOrderMonth: "06",
+    archivePath: "projects/2026/06",
     shipDate: "2026-07-10",
     progress: 67,
     done: 68,
@@ -43,6 +61,10 @@ const projects = [
     name: "除湿机试点项目",
     customer: "示例客户",
     admin: "张绍方",
+    adminOrderDate: "2026-06-25",
+    adminOrderYear: "2026",
+    adminOrderMonth: "06",
+    archivePath: "projects/2026/06",
     shipDate: "2026-07-25",
     progress: 28,
     done: 20,
@@ -79,24 +101,30 @@ const devices = [
 
 const processMap = {
   dvc1: [
-    { name: "项目设计", status: "已完成", owner: "张绍方", phone: "138****0001", due: "2026-06-20", actualStart: "2026-06-15", actualFinish: "2026-06-19" },
-    { name: "结构设计", status: "进行中", owner: "陈七", phone: "138****0002", due: "2026-06-26", actualStart: "2026-06-21", actualFinish: "" },
+    { name: "项目设计", status: "已完成", owner: "蒋相波", phone: "138****0801", due: "2026-06-20", actualStart: "2026-06-15", actualFinish: "2026-06-19" },
+    { name: "结构设计", status: "进行中", owner: "彭博", phone: "138****0401", due: "2026-06-26", actualStart: "2026-06-21", actualFinish: "" },
     { name: "电气设计", status: "进行中", owner: "秦朗", phone: "18352439458", due: "2026-06-28", actualStart: "2026-06-21", actualFinish: "" },
-    { name: "电箱组装", status: "未开始", owner: "-", phone: "-", due: "2026-07-03", actualStart: "", actualFinish: "" },
-    { name: "结构总装", status: "未开始", owner: "-", phone: "-", due: "2026-07-05", actualStart: "", actualFinish: "" },
-    { name: "电气总装", status: "未开始", owner: "-", phone: "-", due: "2026-07-07", actualStart: "", actualFinish: "" },
-    { name: "调试", status: "未开始", owner: "-", phone: "-", due: "2026-07-09", actualStart: "", actualFinish: "" },
-    { name: "发货", status: "未开始", owner: "-", phone: "-", due: "2026-07-10", actualStart: "", actualFinish: "" }
+    { name: "ERP录入", status: "未开始", owner: "刘爽", phone: "138****0701", due: "2026-06-29", actualStart: "", actualFinish: "" },
+    { name: "物料采购", status: "未开始", owner: "郑雪莲", phone: "138****1001", due: "2026-07-01", actualStart: "", actualFinish: "" },
+    { name: "电气盘安装", status: "未开始", owner: "卢建平", phone: "138****0901", due: "2026-07-03", actualStart: "", actualFinish: "" },
+    { name: "结构总装", status: "未开始", owner: "孙志勇", phone: "138****1301", due: "2026-07-05", actualStart: "", actualFinish: "" },
+    { name: "电气总装", status: "未开始", owner: "朱建闯", phone: "138****1401", due: "2026-07-07", actualStart: "", actualFinish: "" },
+    { name: "电箱组装", status: "未开始", owner: "王国峰", phone: "138****1501", due: "2026-07-08", actualStart: "", actualFinish: "" },
+    { name: "调试", status: "未开始", owner: "李洋", phone: "138****0101", due: "2026-07-09", actualStart: "", actualFinish: "" },
+    { name: "发货", status: "未开始", owner: "刘爽", phone: "138****0701", due: "2026-07-10", actualStart: "", actualFinish: "" }
   ],
   dvc2: [
-    { name: "项目设计", status: "已完成", owner: "张绍方", phone: "138****0001", due: "2026-06-20", actualStart: "2026-06-15", actualFinish: "2026-06-19" },
-    { name: "结构设计", status: "已延期", owner: "陈七", phone: "138****0002", due: "2026-06-24", actualStart: "2026-06-21", actualFinish: "" },
+    { name: "项目设计", status: "已完成", owner: "蒋相波", phone: "138****0801", due: "2026-06-20", actualStart: "2026-06-15", actualFinish: "2026-06-19" },
+    { name: "结构设计", status: "进行中", owner: "彭博", phone: "138****0401", due: "2026-06-24", actualStart: "2026-06-21", actualFinish: "" },
     { name: "电气设计", status: "进行中", owner: "秦朗", phone: "18352439458", due: "2026-06-28", actualStart: "2026-06-22", actualFinish: "" },
-    { name: "电箱组装", status: "未开始", owner: "-", phone: "-", due: "2026-07-03", actualStart: "", actualFinish: "" },
-    { name: "结构总装", status: "未开始", owner: "-", phone: "-", due: "2026-07-05", actualStart: "", actualFinish: "" },
-    { name: "电气总装", status: "未开始", owner: "-", phone: "-", due: "2026-07-07", actualStart: "", actualFinish: "" },
-    { name: "调试", status: "未开始", owner: "-", phone: "-", due: "2026-07-09", actualStart: "", actualFinish: "" },
-    { name: "发货", status: "未开始", owner: "-", phone: "-", due: "2026-07-10", actualStart: "", actualFinish: "" }
+    { name: "ERP录入", status: "未开始", owner: "刘爽", phone: "138****0701", due: "2026-06-29", actualStart: "", actualFinish: "" },
+    { name: "物料采购", status: "未开始", owner: "郑雪莲", phone: "138****1001", due: "2026-07-01", actualStart: "", actualFinish: "" },
+    { name: "电气盘安装", status: "未开始", owner: "卢建平", phone: "138****0901", due: "2026-07-03", actualStart: "", actualFinish: "" },
+    { name: "结构总装", status: "未开始", owner: "孙志勇", phone: "138****1301", due: "2026-07-05", actualStart: "", actualFinish: "" },
+    { name: "电气总装", status: "未开始", owner: "朱建闯", phone: "138****1401", due: "2026-07-07", actualStart: "", actualFinish: "" },
+    { name: "电箱组装", status: "未开始", owner: "王国峰", phone: "138****1501", due: "2026-07-08", actualStart: "", actualFinish: "" },
+    { name: "调试", status: "未开始", owner: "李洋", phone: "138****0101", due: "2026-07-09", actualStart: "", actualFinish: "" },
+    { name: "发货", status: "未开始", owner: "刘爽", phone: "138****0701", due: "2026-07-10", actualStart: "", actualFinish: "" }
   ]
 };
 
@@ -105,8 +133,8 @@ const qbList = [
 ];
 
 const tasks = [
-  { type: "生产任务", project: "C26-0422 中创新航藤洲", device: "C26-0422-01 第1台", process: "电气设计", department: "电气设计部", dueDate: "2026-06-28", status: "进行中" },
-  { type: "待分配", project: "C26-0422 中创新航藤洲", device: "C26-0422-02 第2台", process: "结构设计", department: "结构设计部", dueDate: "2026-06-26", status: "待部门派单" },
+  { type: "生产任务", project: "C26-0422 中创新航藤洲", device: "C26-0422-01 第1台", process: "电气设计", department: "电气设计部", dueDate: "2026-06-28", status: "进行中", assignedAt: "2026-06-21" },
+  { type: "生产任务", project: "C26-0422 中创新航藤洲", device: "C26-0422-02 第2台", process: "结构设计", department: "结构设计部", dueDate: "2026-06-26", status: "进行中" },
   { type: "QB待处理", project: "C26-0422 中创新航藤洲", qbNo: "QB26-534", title: "电柜风扇防护网不贴合", status: "处理中" }
 ];
 
@@ -147,16 +175,25 @@ const dictionaries = {
     "项目设计",
     "结构设计",
     "电气设计",
-    "采购物料",
-    "电箱组装",
+    "ERP录入",
+    "物料采购",
     "电气盘安装",
     "结构总装",
     "电气总装",
+    "电箱组装",
     "调试",
     "发货"
   ],
   qbCategories: ["厂内异常", "客户现场异常", "来料异常", "设计异常", "装配异常"],
-  userRoles: ["普通员工", "部门管理员", "进度管理员", "观察员", "后台管理员"],
+  userRoles: ["普通员工", "部门管理员", "进度管理员", "综管部管理员", "观察员", "后台管理员"],
+  paramLibraries: [
+    {
+      key: "electrical",
+      name: "电气参数",
+      sourceKey: "electricalParamValues",
+      visibleDepartments: ["电气设计部"]
+    }
+  ],
   recordStatuses: ["启用", "停用"],
   excelFieldMappings: [
     { field: "deviceUniqueNo", header: "唯一台号", aliases: ["唯一台号\\n(项目号+台号)"], required: true },
@@ -244,8 +281,8 @@ const electricalParamValues = {
 };
 
 const dispatchTasks = [
-  { projectNo: "C26-0422", process: "结构设计", department: "结构设计部", device: "C26-0422-01 第1台", due: "2026-06-26", status: "已派部门" },
-  { projectNo: "C26-0422", process: "电气设计", department: "电气设计部", device: "C26-0422-01 第1台", due: "2026-06-28", status: "已派部门" }
+  { projectNo: "C26-0422", process: "结构设计", department: "结构设计部", device: "C26-0422-01 第1台", due: "2026-06-26", status: "已派部门", dispatchedAt: "2026-06-18" },
+  { projectNo: "C26-0422", process: "电气设计", department: "电气设计部", device: "C26-0422-01 第1台", due: "2026-06-28", status: "已派部门", dispatchedAt: "2026-06-18" }
 ];
 
 const qbDetails = {
@@ -299,6 +336,14 @@ const importPreview = {
 
 const importLogs = [];
 const operationLogs = [];
+const permissions = [
+  { role: "superAdmin", label: "后台管理员", dataScope: "all", permissions: ["viewAdminEntry", "manageUsers", "manageDepartments", "dispatchProject", "dispatchDepartment", "maintainParams", "editParams", "importExcel", "submit"] },
+  { role: "projectAdmin", label: "进度管理员", dataScope: "all", permissions: ["dispatchProject", "importExcel", "submit"] },
+  { role: "departmentManager", label: "部门管理员", dataScope: "department", permissions: ["dispatchDepartment", "submit"] },
+  { role: "quality", label: "采购/品质人员", dataScope: "project", permissions: ["createQb", "closeQb", "submit"] },
+  { role: "electrical", label: "电气人员", dataScope: "project", permissions: ["maintainParams", "editParams", "submit"] },
+  { role: "observer", label: "观察员", dataScope: "self", permissions: [] }
+];
 
 module.exports = {
   users,
@@ -315,6 +360,7 @@ module.exports = {
   importPreview,
   importLogs,
   operationLogs,
+  permissions,
   getProject,
   getDevicesByProject,
   getDevice

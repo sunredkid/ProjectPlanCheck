@@ -3,6 +3,7 @@ const dataService = require("../../services/data-service");
 const DICT_KEYS = {
   processes: { label: "工序字典", icon: "工序" },
   paramCategories: { label: "参数分类字典", icon: "参数" },
+  paramLibraries: { label: "参数库权限", icon: "权限" },
   qbCategories: { label: "QB分类字典", icon: "QB" },
   userRoles: { label: "用户角色字典", icon: "角色" }
 };
@@ -16,6 +17,8 @@ Page({
     })),
     activeDict: "processes",
     items: [],
+    paramLibraries: [],
+    departments: [],
     editingIndex: -1,
     editValue: ""
   },
@@ -26,6 +29,27 @@ Page({
   },
 
   loadDict() {
+    if (this.data.activeDict === "paramLibraries") {
+      const departments = dataService.listDepartments ? dataService.listDepartments().map((item) => item.name) : [];
+      const libraries = (dataService.getParamLibraryConfigs ? dataService.getParamLibraryConfigs() : [])
+        .map((library) => {
+          const visibleDepartments = library.visibleDepartments || [];
+          return Object.assign({}, library, {
+            departmentOptions: departments.map((department) => ({
+              name: department,
+              selected: visibleDepartments.indexOf(department) >= 0
+            }))
+          });
+        });
+      this.setData({
+        paramLibraries: libraries,
+        departments,
+        items: [],
+        editingIndex: -1,
+        editValue: ""
+      });
+      return;
+    }
     const items = dataService.getDictionary ? dataService.getDictionary(this.data.activeDict) : [];
     this.setData({ items: items.slice(), editingIndex: -1, editValue: "" });
   },
@@ -71,5 +95,36 @@ Page({
 
   startAdd() {
     this.setData({ editingIndex: -1, editValue: "" });
+  },
+
+  toggleParamDepartment(e) {
+    const key = e.currentTarget.dataset.key;
+    const department = e.currentTarget.dataset.department;
+    const libraries = this.data.paramLibraries.map((item) => {
+      if (item.key !== key) return item;
+      const departmentOptions = (item.departmentOptions || []).map((option) =>
+        option.name === department ? Object.assign({}, option, { selected: !option.selected }) : option
+      );
+      return Object.assign({}, item, { departmentOptions });
+    });
+    this.setData({ paramLibraries: libraries });
+  },
+
+  saveParamLibraryAccess(e) {
+    const key = e.currentTarget.dataset.key;
+    const library = this.data.paramLibraries.find((item) => item.key === key);
+    if (!library) {
+      wx.showToast({ title: "参数库不存在", icon: "none" });
+      return;
+    }
+    const visibleDepartments = (library.departmentOptions || [])
+      .filter((option) => option.selected)
+      .map((option) => option.name);
+    const result = dataService.updateParamLibraryAccess(key, visibleDepartments);
+    wx.showToast({
+      title: result.ok ? "权限已保存" : result.message || "保存失败",
+      icon: result.ok ? "success" : "none"
+    });
+    if (result.ok) this.loadDict();
   }
 });

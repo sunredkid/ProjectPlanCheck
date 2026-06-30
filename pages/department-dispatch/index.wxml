@@ -1,16 +1,16 @@
 <view class="page">
   <view wx:if="{{loadError}}" class="card state-card">
-    <view class="state-title">部门派单加载失败</view>
+    <view class="state-title">设备派单加载失败</view>
     <view class="muted">{{loadError}}</view>
   </view>
 
   <block wx:else>
   <view class="card hero">
-    <view class="label">部门派单</view>
+    <view class="label">设备派单</view>
     <view class="title">{{task.process}}</view>
     <view class="muted">项目：{{task.project}}</view>
     <view class="muted">设备：{{task.device}}</view>
-    <view class="muted">部门：{{task.department}}｜截止：{{task.due}}</view>
+    <view class="muted">部门：{{task.department}}｜计划完成：{{task.due}}</view>
   </view>
 
   <view class="card">

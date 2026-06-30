@@ -18,9 +18,14 @@ function textMatches(value, keys) {
   return keys.some((key) => value === key || String(value || "").indexOf(key) >= 0);
 }
 
-function userMatches(user, keys) {
+function roleMatches(user, keys) {
   if (!user) return false;
-  return [user.role, user.roleLabel, user.department].some((value) => textMatches(value, keys));
+  return [user.role, user.roleLabel].some((value) => textMatches(value, keys));
+}
+
+function departmentMatches(user, keys) {
+  if (!user) return false;
+  return textMatches(user.department, keys);
 }
 
 function getUser(user) {
@@ -43,13 +48,13 @@ function getUser(user) {
 const MOCK_PERMISSION_MAP = {
   superAdmin: [
     "viewAdminEntry", "manageUsers", "manageDepartments",
-    "createQb", "closeQb", "transferQb",
+    "createQb", "closeQb",
     "dispatchProject", "dispatchDepartment",
     "maintainParams", "editParams", "importExcel", "submit"
   ],
   projectAdmin: ["dispatchProject", "importExcel", "submit"],
   departmentManager: ["dispatchDepartment", "submit"],
-  quality: ["createQb", "closeQb", "transferQb", "submit"],
+  quality: ["createQb", "closeQb", "submit"],
   electrical: ["maintainParams", "editParams", "submit"],
   observer: []
 };
@@ -76,7 +81,7 @@ function getDataScope(user = {}) {
   const role = u.roleLabel || u.role || "";
   if (role.indexOf("后台管理员") >= 0 || role.indexOf("最高级") >= 0 || role.indexOf("超级") >= 0 || role.indexOf("超級") >= 0) return "all";
   if (role.indexOf("进度管理员") >= 0 || role.indexOf("项目管理") >= 0) return "all";
-  if (role.indexOf("部门管理员") >= 0 || role.indexOf("部门主管") >= 0 || role.indexOf("部門主管") >= 0 || u.isManager) return "department";
+  if (role.indexOf("部门管理员") >= 0 || role.indexOf("部门主管") >= 0 || role.indexOf("部門主管") >= 0) return "department";
   if (u.department === "采购部" || u.department === "品质部" || (u.department && u.department.indexOf("品质") >= 0)) return "project";
   if (u.department === "电气设计部" || u.department === "智能自控部" || u.department === "电气设计" || (u.department && u.department.indexOf("电气") >= 0)) return "project";
   if (role.indexOf("观察") >= 0 || role.indexOf("觀察") >= 0) return "self";
@@ -92,7 +97,7 @@ function getMockPermissionsForUser(user = {}) {
   const role = user.roleLabel || user.role || "";
   if (role.indexOf("后台管理员") >= 0 || role.indexOf("最高级") >= 0 || role.indexOf("超级") >= 0 || role.indexOf("超級") >= 0) return MOCK_PERMISSION_MAP.superAdmin;
   if (role.indexOf("进度管理员") >= 0 || role.indexOf("项目管理") >= 0) return MOCK_PERMISSION_MAP.projectAdmin;
-  if (role.indexOf("部门管理员") >= 0 || role.indexOf("部门主管") >= 0 || role.indexOf("部門主管") >= 0 || user.isManager) return MOCK_PERMISSION_MAP.departmentManager;
+  if (role.indexOf("部门管理员") >= 0 || role.indexOf("部门主管") >= 0 || role.indexOf("部門主管") >= 0) return MOCK_PERMISSION_MAP.departmentManager;
   if (user.department === "采购部" || user.department === "品质部" || (user.department && user.department.indexOf("品质") >= 0)) return MOCK_PERMISSION_MAP.quality;
   if (user.department === "电气设计部" || user.department === "智能自控部" || user.department === "电气设计" || (user.department && user.department.indexOf("电气") >= 0)) return MOCK_PERMISSION_MAP.electrical;
   if (role.indexOf("观察") >= 0 || role.indexOf("觀察") >= 0) return MOCK_PERMISSION_MAP.observer;
@@ -130,32 +135,34 @@ function getUserPermissionsAsync(user = {}) {
 // ---- Permission checks (all use mock role-matching for now) ----
 
 function isSuperAdmin(user) {
-  return userMatches(getUser(user), ROLE_KEYS.superAdmin);
+  return roleMatches(getUser(user), ROLE_KEYS.superAdmin);
 }
 
 function isProjectAdmin(user) {
-  return userMatches(getUser(user), ROLE_KEYS.projectAdmin);
+  return roleMatches(getUser(user), ROLE_KEYS.projectAdmin);
 }
 
 function isObserver(user) {
-  return userMatches(getUser(user), ROLE_KEYS.observer);
+  return roleMatches(getUser(user), ROLE_KEYS.observer);
 }
 
 function isDepartmentManager(user) {
   const currentUser = getUser(user);
-  return Boolean(currentUser && (currentUser.isManager || userMatches(currentUser, ROLE_KEYS.departmentManager)));
+  return Boolean(currentUser && roleMatches(currentUser, ROLE_KEYS.departmentManager));
 }
 
 function isQualityUser(user) {
-  return userMatches(getUser(user), DEPARTMENT_KEYS.quality);
+  return departmentMatches(getUser(user), DEPARTMENT_KEYS.quality);
 }
 
 function isElectricalUser(user) {
-  return userMatches(getUser(user), DEPARTMENT_KEYS.electrical);
+  return departmentMatches(getUser(user), DEPARTMENT_KEYS.electrical);
 }
 
 function canViewAdminEntry(user) {
-  return isSuperAdmin(user);
+  const currentUser = getUser(user);
+  const role = String((currentUser && (currentUser.roleLabel || currentUser.role)) || "");
+  return isSuperAdmin(currentUser) || role.indexOf("综管部管理员") >= 0;
 }
 
 function canManageUsers(user) {
@@ -175,7 +182,9 @@ function canCloseQb(user) {
 }
 
 function canDispatchProject(user) {
-  return isSuperAdmin(user) || isProjectAdmin(user);
+  const currentUser = getUser(user);
+  const roleText = String((currentUser && `${currentUser.role || ""} ${currentUser.roleLabel || ""}`) || "");
+  return isSuperAdmin(currentUser) || roleText.indexOf("进度管理员") >= 0 || roleText.indexOf("项目管理员") >= 0;
 }
 
 function canDispatchDepartment(user) {
@@ -199,13 +208,7 @@ function canSubmit(user) {
 }
 
 function canTransferQb(user, qb) {
-  const currentUser = getUser(user);
-  if (!currentUser || isObserver(currentUser)) return false;
-  if (isQualityUser(currentUser)) return true;
-  if (!qb) return true;
-  const isInitiator = qb.initiator && String(qb.initiator).indexOf(currentUser.name) !== -1;
-  const isCurrentOwner = qb.currentOwner === currentUser.name || qb.owner === currentUser.name;
-  return Boolean(isInitiator || isCurrentOwner);
+  return false;
 }
 
 function canEditParams(user) {

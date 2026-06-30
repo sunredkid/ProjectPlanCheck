@@ -28,6 +28,12 @@
       <input class="input" value="{{form.admin}}" data-field="admin" bindinput="setField" placeholder="请输入进度管理员" />
     </view>
     <view class="field">
+      <view class="field-label">进度管理员下单时间</view>
+      <picker mode="date" value="{{form.adminOrderDate}}" bindchange="onAdminOrderDateChange">
+        <view class="picker-value">{{form.adminOrderDate}}</view>
+      </picker>
+    </view>
+    <view class="field">
       <view class="field-label">计划发货</view>
       <picker mode="date" value="{{form.shipDate}}" bindchange="onShipDateChange">
         <view class="picker-value">{{form.shipDate}}</view>

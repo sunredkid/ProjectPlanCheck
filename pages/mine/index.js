@@ -65,6 +65,18 @@ function formatCloudStatus(backend = {}) {
   };
 }
 
+function getUserKey(user = {}) {
+  return user.id || user.phone || user.name || "";
+}
+
+function decoratePreviewUsers(users = [], currentUser = {}) {
+  const currentKey = getUserKey(currentUser);
+  return users.map((item) => ({
+    ...item,
+    active: getUserKey(item) === currentKey
+  }));
+}
+
 Page({
   data: {
     user: {},
@@ -76,9 +88,11 @@ Page({
       { name: "部门管理", url: "/pages/department-manage/index" },
       { name: "权限管理", url: "/pages/permission-manage/index" },
       { name: "工序字典", url: "/pages/dictionary-manage/index" },
-      { name: "参数字段管理", url: "/pages/dictionary-manage/index" }
+      { name: "参数字段管理", url: "/pages/dictionary-manage/index" },
+      { name: "数据看板", url: "/pages/dashboard/index" }
     ],
     selfMenus: [
+      { name: "登录绑定", url: "/pages/login/index" },
       { name: "我的权限", url: "/pages/my-permissions/index" },
       { name: "操作记录", url: "/pages/operation-logs/index" },
       { name: "退出登录", url: "" }
@@ -110,13 +124,14 @@ Page({
   refreshPageState() {
     const authState = authService.getAuthState();
     const user = authService.getCurrentUser() || {};
+    const previewUsers = decoratePreviewUsers(authService.listPreviewUsers(), user);
     this.setData({
       authState,
       user: {
         ...user,
         avatarText: user.name ? user.name.substring(0, 1) : "我"
       },
-      previewUsers: authService.listPreviewUsers(),
+      previewUsers,
       mockPreviewEnabled: authState.mockPreviewEnabled,
       isSuperAdmin: permissionService.canViewAdminEntry(user),
       canViewCloudOps: authState.mockPreviewEnabled || permissionService.canViewAdminEntry(user),
@@ -155,16 +170,18 @@ Page({
     }
     const index = Number(e.currentTarget.dataset.index);
     const user = this.data.previewUsers[index];
-    authService.switchMockUser(user.id || user.phone || user.name);
+    const currentUser = authService.switchMockUser(user.id || user.phone || user.name);
     this.setData({
       user: {
-        ...user,
-        avatarText: user.name.substring(0, 1)
+        ...currentUser,
+        avatarText: currentUser.name.substring(0, 1)
       },
-      isSuperAdmin: permissionService.canViewAdminEntry(user)
+      previewUsers: decoratePreviewUsers(this.data.previewUsers, currentUser),
+      isSuperAdmin: permissionService.canViewAdminEntry(currentUser),
+      canViewCloudOps: this.data.authState.mockPreviewEnabled || permissionService.canViewAdminEntry(currentUser)
     });
     wx.showToast({
-      title: `已切换为${user.roleLabel}`,
+      title: `已切换为${currentUser.name}`,
       icon: "none"
     });
   },

@@ -1,20 +1,30 @@
 <view class="page">
-  <view class="title">权限管理</view>
-  <view class="subtitle">功能权限 + 数据范围对照表（当前为 mock 阶段原型预览）</view>
+  <view class="header-bar">
+    <view>
+      <view class="title">权限管理</view>
+      <view class="subtitle">当前权限配置会写入本地 store；切到云后同步到 permissions 集合。</view>
+    </view>
+    <button size="mini" class="main-btn" loading="{{saving}}" bindtap="saveRows">保存配置</button>
+  </view>
 
   <view class="card perm-matrix-card">
     <view class="section-label">功能权限矩阵</view>
     <view class="perm-scroll">
       <view class="perm-table">
         <view class="perm-row perm-header">
-          <view class="perm-label-col">权限 \\ 角色</view>
-          <view wx:for="{{roles}}" wx:key="id" class="perm-role-col">{{item.label}}</view>
+          <view class="perm-label-col">权限 \ 角色</view>
+          <view wx:for="{{rows}}" wx:key="role" class="perm-role-col">{{item.label}}</view>
         </view>
-        <view wx:for="{{perms}}" wx:key="key" class="perm-row">
-          <view class="perm-label-col">{{item.label}}</view>
-          <view wx:for="{{roles}}" wx:for-item="role" wx:key="id" class="perm-role-col">
-            <view class="perm-dot {{matrix[role.id] && matrix[role.id][item.key] ? 'granted' : 'denied'}}">
-              {{matrix[role.id] && matrix[role.id][item.key] ? '✓' : '×'}}
+        <view wx:for="{{perms}}" wx:key="key" wx:for-item="perm" class="perm-row">
+          <view class="perm-label-col">{{perm.label}}</view>
+          <view wx:for="{{rows}}" wx:for-item="role" wx:key="role" class="perm-role-col">
+            <view
+              class="perm-dot {{role.permissionMap[perm.key] ? 'granted' : 'denied'}}"
+              data-role="{{role.role}}"
+              data-perm="{{perm.key}}"
+              bindtap="togglePerm"
+            >
+              {{role.permissionMap[perm.key] ? '✓' : '×'}}
             </view>
           </view>
         </view>
@@ -23,24 +33,23 @@
   </view>
 
   <view class="card">
-    <view class="section-label">数据范围（P2 dataScope）</view>
+    <view class="section-label">数据范围</view>
     <view class="scope-table">
       <view class="scope-row scope-header">
         <view class="scope-role-col">角色</view>
         <view class="scope-value-col">数据范围</view>
       </view>
-      <view wx:for="{{roles}}" wx:key="id" class="scope-row">
+      <view wx:for="{{rows}}" wx:key="role" class="scope-row">
         <view class="scope-role-col">{{item.label}}</view>
         <view class="scope-value-col">
-          <view class="scope-badge scope-{{dataScopePreview[item.id]}}">{{scopeLabels[dataScopePreview[item.id]]}}</view>
+          <view class="scope-badge scope-{{item.dataScope}}">{{item.scopeText}}</view>
         </view>
       </view>
     </view>
-    <view class="muted scope-note">数据范围说明：\"全部数据\"可看所有项目/设备/任务/QB；\"仅本部门\"只看本部门派单数据；\"仅参与项目\"只看自己参与/负责的项目；\"仅自己\"只看自己创建的记录。</view>
   </view>
 
   <view class="card note">
-    <view class="muted">说明：当前为开发阶段原型，P2 正式版对接微信云权限表后将改为可编辑配置。</view>
+    <view class="muted">QB 在小程序内只读展示，不再提供建单、转交、处理进展、关单等写操作权限；实际流程后续从钉钉同步。</view>
   </view>
 </view>
 <bottom-nav />

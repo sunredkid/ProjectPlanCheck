@@ -105,16 +105,16 @@
   <view wx:if="{{mockPreviewEnabled}}" class="card">
     <view
       wx:for="{{previewUsers}}"
-      wx:key="roleLabel"
-      class="mock-user {{user.roleLabel === item.roleLabel ? 'active' : ''}}"
+      wx:key="id"
+      class="mock-user {{item.active ? 'active' : ''}}"
       data-index="{{index}}"
       bindtap="switchMockUser"
     >
       <view>
-        <view class="mock-name">{{item.roleLabel}}</view>
-        <view class="muted">{{item.name}}｜{{item.department}}</view>
+        <view class="mock-name">{{item.name}}</view>
+        <view class="muted">{{item.department}}｜{{item.roleLabel}}</view>
       </view>
-      <view wx:if="{{user.roleLabel === item.roleLabel}}" class="selected">当前</view>
+      <view wx:if="{{item.active}}" class="selected">当前</view>
     </view>
   </view>
 

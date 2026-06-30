@@ -1,3 +1,5 @@
+.header-bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.header-bar .main-btn { flex: none; margin-top: 2px; }
 .perm-matrix-card { padding: 0; overflow: hidden; }
 .perm-scroll { overflow-x: auto; }
 .perm-table { min-width: 600px; }

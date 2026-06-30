@@ -2,8 +2,9 @@
 const importParser = require("./import-parser");
 const xlsxReader = require("./xlsx-reader");
 const auditService = require("./audit-service");
+const cloudConfig = require("./cloud-config");
 
-const TEMPLATE_PATH = "C:\\Users\\sunre\\Documents\\电气工作日常\\outputs\\templates\\小程序标准导入模板_单台设备进度_v3.xlsx";
+const TEMPLATE_PATH = "D:\\WeChatProjects\\miniprogram-1\\outputs\\templates\\小程序标准导入模板_单台设备进度_v4.xlsx";
 const STANDARD_SHEET_NAME = "③单台设备进度";
 
 
@@ -28,6 +29,25 @@ const DEFAULT_FIELD_MAPPINGS = [
   { field: "remark", header: "备注", required: false }
 ];
 
+function getTodayString() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function getProjectArchiveMeta(adminOrderDate = "") {
+  const text = String(adminOrderDate || "").trim();
+  const match = text.match(/^(\d{4})-(\d{1,2})/);
+  const year = match ? match[1] : "";
+  const month = match ? String(Number(match[2])).padStart(2, "0") : "";
+  return {
+    adminOrderYear: year,
+    adminOrderMonth: month,
+    archivePath: year && month ? `projects/${year}/${month}` : ""
+  };
+}
+
 function getFieldMappings() {
   const dictMappings = (mockData.dictionaries && mockData.dictionaries.excelFieldMappings);
   if (Array.isArray(dictMappings) && dictMappings.length > 0) {
@@ -50,11 +70,24 @@ function getStandardTemplateInfo() {
 }
 
 function getTemplateDownloadInfo() {
+  const templateConfig = (cloudConfig.standardTemplates && cloudConfig.standardTemplates.progressImport) || {};
+  const cloudFileID = String(templateConfig.cloudFileID || "").trim();
+  const httpsUrl = String(templateConfig.httpsUrl || "").trim();
+  const fileName = templateConfig.fileName || "小程序标准导入模板_单台设备进度_v4.xlsx";
+  const mode = cloudFileID
+    ? "cloud-template-file"
+    : (httpsUrl ? "https-template-file" : "local-dev-template-file");
   return {
     ...getTemplateInfo(),
-    fileName: "小程序标准导入模板_单台设备进度_v3.xlsx",
-    mode: "local-template-path",
-    message: "Template path is ready."
+    fileName,
+    mode,
+    templateDownloadMode: mode,
+    cloudFileID,
+    httpsUrl,
+    cloudPath: templateConfig.cloudPath || "templates/小程序标准导入模板_单台设备进度_v4.xlsx",
+    message: cloudFileID || httpsUrl
+      ? "Template file is ready for production download."
+      : "Template cloud download is not configured; local dev path is used."
   };
 }
 
@@ -77,9 +110,10 @@ function clone(value) {
 function normalizeProcessName(name = "") {
   const value = String(name || "").trim();
   const map = {
-    "机械采购": "采购物料",
-    "电气采购": "采购物料",
-    "采购部门": "采购物料",
+    "机械采购": "物料采购",
+    "电气采购": "物料采购",
+    "采购部门": "物料采购",
+    "采购物料": "物料采购",
     "结构装配": "结构总装",
     "电气装配": "电气总装"
   };
@@ -97,9 +131,13 @@ function normalizeDepartmentName(name = "") {
     "电气设计": "电气设计部",
     "电气设计部门": "电气设计部",
     "智能自控部": "电气设计部",
-    "项目管理": "制造部",
+    "项目管理": "项目部",
     "进度管理": "制造部",
     "结构设计": "结构设计部",
+    "电工房": "电气电控车间",
+    "结构班组": "生产装配",
+    "电气班组": "生产装配",
+    "生产部": "工艺部门",
     "仓库": "仓库部"
   };
   return map[value] || value;
@@ -179,7 +217,7 @@ function createPreview(rows = []) {
 function createParseFailurePreview(file = {}, message = "解析Excel文件失败") {
   return {
     fileName: file && file.name ? file.name : "",
-    templateVersion: "单台设备生产进度统一跟踪表 v3",
+    templateVersion: "单台设备生产进度统一跟踪表 v4",
     standardSheet: STANDARD_SHEET_NAME,
     source: "xlsx",
     projectCount: 0,
@@ -244,7 +282,7 @@ function parseMockPreview(file) {
 
   return {
     fileName: file && file.name ? file.name : "",
-    templateVersion: preview.templateVersion || "单台设备生产进度统一跟踪表 v3",
+    templateVersion: preview.templateVersion || "单台设备生产进度统一跟踪表 v4",
     standardSheet: STANDARD_SHEET_NAME,
     source: "mock",
     projectCount: preview.projectCount || 0,
@@ -277,7 +315,7 @@ function parseTablePreview(tableRows = [], file = {}) {
 
   return {
     fileName: file && file.name ? file.name : "",
-    templateVersion: "单台设备生产进度统一跟踪表 v3",
+    templateVersion: "单台设备生产进度统一跟踪表 v4",
     standardSheet: STANDARD_SHEET_NAME,
     projectCount,
     deviceCount,
@@ -445,7 +483,7 @@ function buildRowIssues(rows = [], validation = {}) {
     .sort((a, b) => a.row - b.row);
 }
 
-function confirmImport(rows = []) {
+function confirmImport(rows = [], options = {}) {
   const validation = validateImportRows(rows);
   if (!validation.ok) {
     return {
@@ -469,6 +507,9 @@ function confirmImport(rows = []) {
     const projectNo = row.projectNo;
     const deviceNo = getImportDeviceNo(row);
     const shipDate = getBusinessShipDate(row) || row.due || "";
+    const orderDateMap = options.projectOrderDates || {};
+    const adminOrderDate = orderDateMap[projectNo] || row.adminOrderDate || row.orderDate || getTodayString();
+    const archiveMeta = getProjectArchiveMeta(adminOrderDate);
     projectNos.add(projectNo);
     deviceNos.add(deviceNo);
 
@@ -480,6 +521,10 @@ function confirmImport(rows = []) {
         name: row.projectName || `导入项目 ${projectNo}`,
         customer: row.customer || "",
         admin: row.admin || "",
+        adminOrderDate,
+        adminOrderYear: archiveMeta.adminOrderYear,
+        adminOrderMonth: archiveMeta.adminOrderMonth,
+        archivePath: archiveMeta.archivePath,
         shipDate,
         progress: 0,
         done: 0,
@@ -490,6 +535,11 @@ function confirmImport(rows = []) {
         status: "进行中"
       };
       mockData.projects.push(project);
+    } else {
+      project.adminOrderDate = adminOrderDate;
+      project.adminOrderYear = archiveMeta.adminOrderYear;
+      project.adminOrderMonth = archiveMeta.adminOrderMonth;
+      project.archivePath = archiveMeta.archivePath;
     }
 
     let device = mockData.devices.find((item) => item.deviceNo === deviceNo);

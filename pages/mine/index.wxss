@@ -10,6 +10,11 @@
   align-items: center;
 }
 
+.profile + .section-title,
+.profile + .section-title + .cloud-card {
+  display: none;
+}
+
 .avatar {
   width: 96rpx;
   height: 96rpx;

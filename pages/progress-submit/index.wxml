@@ -11,17 +11,19 @@
     <view class="muted">项目：{{task.project}}</view>
     <view class="muted">设备：{{task.device}}</view>
     <view class="muted">负责人：{{task.owner}}</view>
-    <view class="muted">计划截止：{{task.plannedDueDate}}</view>
+    <view class="muted">计划完成：{{task.plannedDueDate}}</view>
   </view>
 
   <view class="card">
     <view class="section-title">更新后状态</view>
+    <view wx:if="{{statusLocked}}" class="locked-status">提交后自动记为已完成</view>
     <view class="status-list">
       <view
         wx:for="{{statusOptions}}"
         wx:key="*this"
         class="status-option {{status === item ? 'active' : ''}}"
         data-value="{{item}}"
+        wx:if="{{!statusLocked || item === status}}"
         bindtap="chooseStatus"
       >
         {{item}}
@@ -87,5 +89,27 @@
     <button class="submit-btn" bindtap="submit" loading="{{isSubmitting}}" disabled="{{isSubmitting}}">提交进度</button>
   </view>
   </block>
+
+  <view wx:if="{{unfinishedDialogVisible}}" class="modal-mask">
+    <view class="unfinished-dialog">
+      <view class="dialog-title">存在未完成设备</view>
+      <view class="dialog-desc">以下设备的本部门工序尚未完成，本次项目进度提交失败。请等待每台设备都提交完成后，再提交项目进度。</view>
+      <view class="unfinished-table">
+        <view class="unfinished-row unfinished-head">
+          <view>未完成设备</view>
+          <view>负责人</view>
+          <view>预计完成时间</view>
+        </view>
+        <view wx:for="{{unfinishedRows}}" wx:key="deviceId" class="unfinished-row">
+          <view>{{item.deviceNo}}</view>
+          <view>{{item.owner}}</view>
+          <view>{{item.dueText}}</view>
+        </view>
+      </view>
+      <view class="dialog-actions">
+        <button class="dialog-primary" bindtap="acknowledgeUnfinishedDialog">已知晓</button>
+      </view>
+    </view>
+  </view>
 </view>
 <bottom-nav />

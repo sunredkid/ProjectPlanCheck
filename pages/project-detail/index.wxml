@@ -12,7 +12,11 @@
       <view>客户：{{project.customer}}</view>
       <view>产品线：{{project.productLine}}</view>
       <view>管理员：{{project.admin}}</view>
-      <view>计划发货：{{project.shipDate}}</view>
+      <view class="ship-date-line">
+        计划发货：{{project.shipDate}}
+        <text wx:if="{{project.shipDateSuffix}}" class="{{project.shipDateTone}}">{{project.shipDateSuffix}}</text>
+        <text wx:if="{{project.hasShipDateAdjustment}}" class="history-link" bindtap="showShipDateHistory">调整记录</text>
+      </view>
     </view>
     <view class="summary">
       <view>
@@ -25,7 +29,7 @@
       </view>
       <view>
         <view class="summary-num danger">{{project.delayedCount}}</view>
-        <view class="summary-label">延期</view>
+        <view class="summary-label">逾期</view>
       </view>
       <view>
         <view class="summary-num warning">{{project.qbOpen}}</view>
@@ -35,10 +39,17 @@
   </view>
 
   <view class="project-actions">
-    <button size="mini" class="ghost-btn" bindtap="editProject">编辑项目</button>
-    <button size="mini" class="ghost-btn" bindtap="archiveProject">归档项目</button>
-    <button size="mini" class="danger-btn" bindtap="deleteProject">删除项目</button>
-    <button size="mini" class="main-btn" bindtap="openDispatch">项目派单</button>
+    <button wx:if="{{canEditProject}}" size="mini" class="ghost-btn" bindtap="editProject">编辑项目</button>
+    <button wx:if="{{canEditProject}}" size="mini" class="danger-btn" bindtap="deleteProject">删除项目</button>
+    <button wx:if="{{canDispatchProject}}" size="mini" class="main-btn" bindtap="openDispatch">项目派单</button>
+    <button
+      wx:if="{{canDispatchDepartment && canDepartmentSubmitProject}}"
+      size="mini"
+      class="main-btn"
+      data-process="{{departmentSubmitProcess}}"
+      data-department="{{departmentSubmitDepartment}}"
+      bindtap="openProjectDepartmentProgress"
+    >提交项目进度</button>
   </view>
 
   <view class="tabs">
@@ -56,7 +67,7 @@
   <block wx:if="{{activeTab === '设备进度'}}">
     <view class="section-row">
       <view class="section-title">设备进度总览</view>
-      <button size="mini" class="main-btn" bindtap="addDevice">新增设备</button>
+      <button wx:if="{{canEditProject}}" size="mini" class="main-btn" bindtap="addDevice">新增设备</button>
     </view>
 
     <view wx:if="{{devices.length === 0}}" class="state-card">
@@ -77,22 +88,35 @@
 
       <view class="device-actions">
         <button size="mini" class="ghost-btn" data-id="{{item.id}}" bindtap="toggleDeviceProcesses">
-          {{expandedDevices[item.id] ? '收起工序' : '展开工序'}}
+          {{item.expanded ? '收起工序' : '展开工序'}}
         </button>
         <button size="mini" class="main-btn" data-id="{{item.id}}" bindtap="openDevice">查看详情</button>
       </view>
 
-      <view wx:if="{{expandedDevices[item.id]}}" class="process-list">
+      <view wx:if="{{item.expanded}}" class="process-list">
         <view wx:for="{{item.processes}}" wx:for-item="p" wx:key="name" class="process-row">
           <view class="process-left">
-            <view class="dot {{p.status === '已完成' ? 'done' : ''}} {{p.status === '进行中' ? 'doing' : ''}} {{p.status === '已延期' ? 'late' : ''}}"></view>
+            <view class="dot {{p.status === '已完成' ? 'done' : ''}} {{p.status === '进行中' ? 'doing' : ''}} {{p.isOverdue ? 'late' : ''}}"></view>
             <view>
               <view class="process-name">{{p.name}}</view>
-              <view class="process-meta">截止：{{p.due}}｜负责人：{{p.owner}}</view>
+              <view class="process-meta">计划完成：{{p.due}}｜负责人：{{p.owner}}</view>
+              <view wx:if="{{p.actualFinish}}" class="process-meta">
+                进度提交日期：<text class="{{p.actualFinishTone}}">{{p.actualFinish}}</text>
+              </view>
             </view>
           </view>
-          <view class="status {{p.status === '已延期' ? 'danger' : ''}}">{{p.status}}</view>
+          <view class="process-actions">
+            <view class="status {{p.isOverdue ? 'danger' : ''}}">{{p.status}}</view>
+            <button
+              wx:if="{{canDispatchDepartment && p.canDepartmentDispatch}}"
+              size="mini"
+              class="main-btn"
+              data-row-key="{{p.dispatchRowKey}}"
+              bindtap="openDepartmentDispatch"
+            >设备派单</button>
+          </view>
         </view>
+        <view wx:if="{{item.processes.length === 0}}" class="muted">暂无工序数据</view>
       </view>
     </view>
   </block>
@@ -100,8 +124,8 @@
   <block wx:elif="{{activeTab === 'QB异常'}}">
     <view class="section-row">
       <view class="section-title">项目 QB 异常</view>
-      <button wx:if="{{canCreateQb}}" size="mini" class="main-btn" bindtap="addQb">新增QB</button>
     </view>
+    <view class="readonly-note">QB 已切换为只读查看，建单、流转和关单后续由钉钉同步。</view>
 
     <view wx:if="{{qbList.length === 0}}" class="state-card">
       <view class="state-title">暂无 QB 异常</view>
@@ -156,5 +180,29 @@
     </view>
   </block>
   </block>
+
+  <view wx:if="{{shipDateHistoryVisible}}" class="modal-mask" bindtap="hideShipDateHistory">
+    <view class="history-dialog" catchtap="noop">
+      <view class="dialog-head">
+        <view>
+          <view class="dialog-title">调整记录</view>
+          <view class="dialog-subtitle">{{project.projectNo}} {{project.name}}</view>
+        </view>
+        <view class="dialog-close" bindtap="hideShipDateHistory">×</view>
+      </view>
+      <view class="history-table">
+        <view class="history-row history-header">
+          <view>序号</view>
+          <view>下单日期</view>
+          <view>计划发货日期</view>
+        </view>
+        <view wx:for="{{shipDateHistoryRecords}}" wx:key="index" class="history-row">
+          <view>{{item.index}}</view>
+          <view>{{item.adminOrderDate}}</view>
+          <view>{{item.shipDate}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>
 <bottom-nav />

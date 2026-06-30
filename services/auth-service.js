@@ -20,7 +20,7 @@ function isReleaseEnv() {
 }
 
 function isMockPreviewEnabled() {
-  return !isReleaseEnv();
+  return getRuntimeEnv() === "develop";
 }
 
 // ---- Current user (mock fallback) ----
@@ -29,13 +29,25 @@ function getCurrentUser() {
   if (typeof wx === "undefined") {
     return mockUser.users[0];
   }
+  if (!isMockPreviewEnabled()) {
+    const stored = wx.getStorageSync ? wx.getStorageSync("mock_current_user") : null;
+    if (stored) return mockUser.normalizeUser(stored);
+    return {
+      id: "",
+      userId: "",
+      name: "未登录",
+      department: "",
+      role: "临时用户",
+      roleLabel: "临时用户",
+      phone: "",
+      status: "未绑定",
+      loginDisabled: false
+    };
+  }
   return mockUser.getCurrentUser();
 }
 
 function setCurrentUser(user) {
-  if (!isMockPreviewEnabled()) {
-    return getCurrentUser();
-  }
   if (typeof wx === "undefined") {
     return user;
   }
@@ -94,8 +106,8 @@ function performCloudLogin(code = "") {
 
   setLoginCode(code);
 
-  // Mock path: simulate cloud login
-  if (!isReleaseEnv()) {
+  // Local development path: simulate cloud login
+  if (isMockPreviewEnabled()) {
     loginState.openid = "mock-openid-" + Date.now();
     loginState.loginMode = "cloud-matched";
     return Promise.resolve({

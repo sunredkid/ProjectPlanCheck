@@ -1,37 +1,7 @@
 <view class="page">
-  <view wx:if="{{loadError}}" class="card state-card">
-    <view class="state-title">QB 转交加载失败</view>
-    <view class="muted">{{loadError}}</view>
+  <view class="card state-card">
+    <view class="state-title">QB 只读查看</view>
+    <view class="muted">{{readonlyMessage}}</view>
   </view>
-
-  <block wx:else>
-  <view class="card">
-    <view class="label">当前 QB</view>
-    <view class="qb-no">{{qbNo}}</view>
-    <view class="muted">当前负责人：{{currentOwner}}</view>
-  </view>
-
-  <view class="card">
-    <view class="section-title">转交给</view>
-    <view
-      wx:for="{{users}}"
-      wx:key="*this"
-      class="user-row {{selectedUser === item ? 'active' : ''}}"
-      data-value="{{item}}"
-      bindtap="chooseUser"
-    >
-      {{item}}
-    </view>
-  </view>
-
-  <view class="card">
-    <view class="section-title">转交原因</view>
-    <textarea class="textarea" value="{{reason}}" bindinput="onReasonInput" placeholder="必须说明为什么转交，例如：该问题涉及电气清单调整" />
-  </view>
-
-  <view class="bottom-actions">
-    <button class="submit-btn" bindtap="submitTransfer" loading="{{isSubmitting}}" disabled="{{isSubmitting}}">确认转交</button>
-  </view>
-  </block>
 </view>
 <bottom-nav />

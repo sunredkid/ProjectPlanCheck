@@ -87,6 +87,50 @@
   font-weight: 800;
 }
 
+.timeline-group {
+  position: relative;
+  margin-top: 18rpx;
+  padding-left: 24rpx;
+}
+
+.timeline-group::before {
+  content: "";
+  position: absolute;
+  left: 10rpx;
+  top: 48rpx;
+  bottom: 0;
+  width: 2rpx;
+  background: #d1d5db;
+}
+
+.timeline-month {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #0b7a75;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 800;
+  margin-bottom: 12rpx;
+}
+
+.timeline-card {
+  position: relative;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -22rpx;
+  top: 34rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #0b7a75;
+  border: 4rpx solid #ffffff;
+}
+
 .qb-top,
 .qb-bottom {
   display: flex;

@@ -1,8 +1,8 @@
 <view class="page">
   <view class="card hero">
     <view class="label">QB</view>
-    <view class="title">QB 异常列表</view>
-    <view class="muted">集中查看全部项目的 QB 异常，可按状态和关键词筛选。</view>
+    <view class="title">QB 时间轴</view>
+    <view class="muted">只读查看 QB，按进度管理员下单时间梳理；建单、处理和关单后续由钉钉同步。</view>
   </view>
 
   <view class="card filter-card">
@@ -57,23 +57,27 @@
     <view class="muted">可调整关键词或状态筛选。</view>
   </view>
 
-  <view wx:for="{{qbList}}" wx:key="qbNo" class="card qb-card">
-    <view class="qb-top">
-      <view>
-        <view class="qb-no">{{item.qbNo}}</view>
-        <view class="qb-title">{{item.title}}</view>
+  <view wx:for="{{timelineGroups}}" wx:for-item="group" wx:key="key" class="timeline-group">
+    <view class="timeline-month">{{group.label}}</view>
+    <view wx:for="{{group.items}}" wx:for-item="item" wx:key="qbNo" class="card qb-card timeline-card">
+      <view class="timeline-dot"></view>
+      <view class="qb-top">
+        <view>
+          <view class="qb-no">{{item.qbNo}}</view>
+          <view class="qb-title">{{item.title}}</view>
+        </view>
+        <view class="tag">{{item.status}}</view>
       </view>
-      <view class="tag">{{item.status}}</view>
-    </view>
-    <view class="info-grid">
-      <view>项目：{{item.projectNo}} {{item.projectName}}</view>
-      <view>工序：{{item.process}}</view>
-      <view>负责人：{{item.displayOwner}}</view>
-      <view>发生时间：{{item.occurredAt}}</view>
-    </view>
-    <view class="qb-bottom">
-      <view class="muted">全局 QB 列表</view>
-      <button size="mini" class="main-btn" data-no="{{item.qbNo}}" bindtap="openQb">查看详情</button>
+      <view class="info-grid">
+        <view>项目：{{item.projectNo}} {{item.projectName}}</view>
+        <view>工序：{{item.process}}</view>
+        <view>负责人：{{item.displayOwner}}</view>
+        <view>发生时间：{{item.occurredAt}}</view>
+      </view>
+      <view class="qb-bottom">
+        <view class="muted">下单时间：{{item.projectOrderDate || '-'}}</view>
+        <button size="mini" class="main-btn" data-no="{{item.qbNo}}" bindtap="openQb">查看详情</button>
+      </view>
     </view>
   </view>
 
